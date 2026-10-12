@@ -1,0 +1,7 @@
+# Private: the business plan and notes stay on this Mac, never in the public repo
+Faro Ahmedabad Plan.md
+notes/
+
+# Local tooling
+.claude/
+.DS_Store
