@@ -52,7 +52,7 @@ kbd{font:500 11px/1 var(--f-mono);padding:3px 5px;border-radius:5px;border:1px s
 .eyebrow{margin:0;font:600 12px/1.2 var(--f-body);letter-spacing:.14em;text-transform:uppercase;color:var(--marigold)}
 .gu{font-family:var(--f-body);font-weight:600}
 
-.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:44px;padding:0 18px;border-radius:999px;border:1px solid var(--line);background:rgba(251,241,226,.07);cursor:pointer;font-weight:600;white-space:nowrap;transition:transform .15s ease,background .15s ease,border-color .15s ease}
+.btn{text-decoration:none;display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:44px;padding:0 18px;border-radius:999px;border:1px solid var(--line);background:rgba(251,241,226,.07);cursor:pointer;font-weight:600;white-space:nowrap;transition:transform .15s ease,background .15s ease,border-color .15s ease}
 .btn:hover{background:rgba(251,241,226,.14)}
 .btn:active{transform:scale(.97)}
 .btn.primary{background:var(--saffron);color:var(--night);border-color:transparent}
@@ -161,7 +161,42 @@ kbd{font:500 11px/1 var(--f-mono);padding:3px 5px;border-radius:5px;border:1px s
 .fade{position:fixed;inset:0;z-index:15;background:var(--night);opacity:0;pointer-events:none;transition:opacity .3s ease}
 .fade.on{opacity:1}
 
+/* shop together */
+.narrow{display:none}
+.group-dot{width:9px;height:9px;border-radius:50%;background:#8fdc8a;box-shadow:0 0 0 3px rgba(143,220,138,.25);flex:none}
+.group-dot.wait{background:var(--marigold);box-shadow:0 0 0 3px rgba(255,194,71,.25)}
+.invite-note{margin:0;max-width:46ch;padding:12px 16px;border-radius:14px;border:1px solid rgba(255,194,71,.5);background:rgba(22,17,42,.55);color:var(--chalk);font-size:15px}
+.invite-note b{color:var(--marigold)}
+.react{position:absolute;right:16px;bottom:calc(28px + env(safe-area-inset-bottom,0px));display:flex;align-items:center;gap:10px;pointer-events:auto}
+.react-btn{width:52px;height:52px;border-radius:50%;font-size:24px}
+.react-tray{display:flex;gap:4px;padding:6px;border-radius:999px}
+.react-tray button{min-height:40px;padding:0 12px;border:0;border-radius:999px;background:transparent;cursor:pointer;font-size:14px;font-weight:600;white-space:nowrap}
+.react-tray button:hover,.react-tray button:focus-visible{background:rgba(251,241,226,.14);outline:none}
+.react-tray .emo{font-size:22px;padding:0 8px}
+.react-tray kbd{margin-left:6px}
+.members{display:grid;gap:8px;margin:0;padding:0;list-style:none}
+.member{display:grid;grid-template-columns:auto minmax(0,1fr) auto;align-items:center;gap:12px;padding:10px 12px;border-radius:14px;border:1px solid var(--line);background:rgba(251,241,226,.04)}
+.member-av{width:32px;height:32px;border-radius:50%;background:var(--c);box-shadow:inset 0 0 0 3px var(--c2)}
+.member-name{margin:0;font-weight:700;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.member-sub{margin:0;font-size:13px;color:var(--chalk-2);min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.member-actions{display:flex;gap:6px}
+.member-actions .btn{min-height:36px;padding:0 12px;font-size:13px}
+.member-actions .btn.on{border-color:var(--marigold);color:var(--marigold)}
+.link-box{display:grid;gap:10px;padding:14px;border-radius:14px;border:1px dashed rgba(255,194,71,.55);background:rgba(255,194,71,.07)}
+.link-text{font:500 14px/1.35 var(--f-mono);color:var(--marigold);overflow-wrap:anywhere;user-select:all}
+.link-actions{display:flex;flex-wrap:wrap;gap:8px}
+.link-actions .btn{flex:1}
+.steps{margin:0;padding-left:20px;display:grid;gap:6px;color:var(--chalk-2)}
+.note{margin:0;font-size:13px;color:var(--chalk-3)}
+.note.warn{color:var(--marigold)}
+.btn.star.on{border-color:var(--marigold);color:var(--marigold)}
+.dir-star{color:var(--marigold);margin-left:4px}
+
 @media (max-width:720px){
+  .hud-tr .narrow{display:inline}
+  .react{bottom:calc(168px + env(safe-area-inset-bottom,0px));flex-direction:column-reverse;align-items:flex-end}
+  .react-tray{flex-direction:column;align-items:stretch;border-radius:18px}
+  .react-tray kbd{display:none}
   .creator{top:auto;left:0;right:0;bottom:0;width:auto;height:min(54vh,520px);border-radius:var(--r-panel) var(--r-panel) 0 0}
   .panel-head{padding:16px 18px 4px}
   .panel-head h2{font-size:24px}
@@ -173,6 +208,10 @@ kbd{font:500 11px/1 var(--f-mono);padding:3px 5px;border-radius:5px;border:1px s
   .hud-tr .btn{min-height:40px;padding:0 14px;font-size:14px}
   .map{width:180px;height:52px}
   .hint{top:auto;bottom:calc(176px + env(safe-area-inset-bottom,0px));white-space:normal;text-align:center;width:max-content;max-width:calc(100vw - 32px)}
+}
+@media (max-width:440px){
+  .brand{padding:7px}
+  .brand > span:last-child{display:none}
 }
 @media (prefers-reduced-motion:reduce){*{animation-duration:.01ms!important;transition-duration:.01ms!important}}
 </style>
@@ -188,6 +227,7 @@ kbd{font:500 11px/1 var(--f-mono);padding:3px 5px;border-radius:5px;border:1px s
   <h1>Gurukul <span>Street</span></h1>
   <p class="gu" lang="gu">ગુરુકુળ રોડ, મેમનગર</p>
   <p class="lede">Walk Memnagar's festive clothing street from your screen. Make your avatar, stroll past the shops, and step inside the ones that catch your eye.</p>
+  <p class="invite-note" id="inviteNote" hidden><b>You're invited to shop together.</b> Make your avatar and you'll join your friend on the street.</p>
   <div class="row">
     <button class="btn primary" id="startBtn">Make your avatar</button>
     <span class="meta">12 sample shops · phone and desktop</span>
@@ -221,8 +261,13 @@ kbd{font:500 11px/1 var(--f-mono);padding:3px 5px;border-radius:5px;border:1px s
     <canvas class="map glass" id="map" aria-label="Street map. Click a shop to go there."></canvas>
   </div>
   <div class="hud-tr">
-    <button class="btn glass" id="shopsBtn">Find a shop <kbd class="wide">F</kbd></button>
+    <button class="btn glass" id="shopsBtn"><span class="wide">Find a shop</span><span class="narrow">Shops</span> <kbd class="wide">F</kbd></button>
+    <button class="btn glass" id="groupBtn"><span class="group-dot" id="groupDot" hidden></span><span class="wide">Shop together</span><span class="narrow">Together</span> <kbd class="wide">G</kbd></button>
     <button class="btn glass" id="avatarBtn" title="Change your avatar">Avatar</button>
+  </div>
+  <div class="react" id="react" hidden>
+    <div class="react-tray glass" id="reactTray" hidden></div>
+    <button class="btn glass icon react-btn" id="reactBtn" aria-label="Send a reaction to your group" aria-expanded="false">😊</button>
   </div>
   <div class="hint glass" id="hint"></div>
   <div class="prompt glass" id="prompt" hidden>
@@ -233,6 +278,8 @@ kbd{font:500 11px/1 var(--f-mono);padding:3px 5px;border-radius:5px;border:1px s
 </div>
 
 <aside class="sheet glass" id="shopSheet" aria-label="Shop details"></aside>
+
+<aside class="sheet glass" id="groupSheet" aria-label="Shop together"></aside>
 
 <aside class="sheet glass" id="dirSheet" aria-label="Find a shop">
   <header class="sheet-head">
@@ -1330,6 +1377,7 @@ const ui = {
   loader: $('loader'), intro: $('intro'), scrim: $('scrim'), creator: $('creator'), hud: $('hud'), prompt: $('prompt'),
   promptName: $('promptName'), promptSub: $('promptSub'), hint: $('hint'), joy: $('joy'), knob: $('joyKnob'),
   shopSheet: $('shopSheet'), dirSheet: $('dirSheet'), toast: $('toast'), fade: $('fade'), map: $('map'),
+  groupSheet: $('groupSheet'), groupDot: $('groupDot'), react: $('react'), reactTray: $('reactTray'), reactBtn: $('reactBtn'), inviteNote: $('inviteNote'),
 };
 const STORE_KEY = 'faro-gurukul-avatar-v1';
 const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
@@ -1355,19 +1403,20 @@ let toastT;
 function toast(msg) { ui.toast.textContent = msg; ui.toast.classList.add('show'); clearTimeout(toastT); toastT = setTimeout(() => ui.toast.classList.remove('show'), 2800); }
 
 /* ---------- player avatar and name tag ---------- */
-function makeTag(text) {
+function makeTag(text, ring) {
   const c = document.createElement('canvas'); c.width = 512; c.height = 112; const g = c.getContext('2d');
   g.font = '600 50px "Hind Vadodara", system-ui, sans-serif';
   const w = Math.min(496, g.measureText(text).width + 64);
   g.fillStyle = 'rgba(22,17,42,.8)'; g.beginPath();
   if (g.roundRect) g.roundRect((512 - w) / 2, 12, w, 88, 44); else g.rect((512 - w) / 2, 12, w, 88);
-  g.fill(); g.fillStyle = '#fbf1e2'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText(text, 256, 60);
+  g.fill(); if (ring) { g.strokeStyle = ring; g.lineWidth = 6; g.stroke(); } g.fillStyle = '#fbf1e2'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText(text, 256, 60);
   const s = new THREE.Sprite(new THREE.SpriteMaterial({ map: canvasTex(c), transparent: true, depthWrite: false }));
   s.scale.set(1.0, 0.22, 1); s.position.y = 2.22; s.renderOrder = 10; return s;
 }
 function updateTag() {
   if (player.tag) { player.tag.material.map.dispose(); player.tag.material.dispose(); player.tag.removeFromParent(); }
   player.tag = makeTag(name.trim() || 'You'); player.av.root.add(player.tag); player.tag.visible = state === 'play';
+  groupAnnounce();
 }
 function setPlayerAvatar() {
   if (player.av) disposeAvatar(player.av);
@@ -1444,7 +1493,7 @@ function updateNear(force) {
   renderPrompt();
 }
 function renderPrompt() {
-  const s = near.shop, show = state === 'play' && !!s && !ui.shopSheet.classList.contains('open');
+  const s = near.shop, show = state === 'play' && !!s && ![ui.shopSheet, ui.dirSheet, ui.groupSheet].some((el) => el.classList.contains('open'));
   ui.prompt.hidden = !show; if (!show) return;
   ui.promptName.textContent = s.name;
   ui.promptSub.textContent = (near.inside ? 'You are inside · ' : '') + CATS[s.cat].label + ' · ' + rupee(s.price[0]) + ' to ' + rupee(s.price[1]);
@@ -1493,7 +1542,9 @@ addEventListener('keydown', (e) => {
   if (state !== 'play' || e.repeat) return;
   if ((k === 'e' || k === 'enter') && near.shop && document.activeElement?.tagName !== 'BUTTON') openShop(near.shop);
   if (k === 'f') openDirectory();
-  if (k === 'escape') closeSheets();
+  if (k === 'g') openGroup();
+  if (group.room && /^[1-5]$/.test(k)) sendReaction(Number(k) - 1);
+  if (k === 'escape') { closeSheets(); toggleTray(false); }
 });
 addEventListener('keyup', (e) => keys.delete(e.key.toLowerCase()));
 addEventListener('blur', () => keys.clear());
@@ -1541,9 +1592,15 @@ function updatePlayer(dt) {
   let mag = Math.hypot(ix, iz); if (mag > 1) { ix /= mag; iz /= mag; mag = 1; }
   let run = keys.has('shift');
   if (joy.id !== null) { ix = joy.x; iz = -joy.y; mag = Math.min(1, Math.hypot(ix, iz)); run = mag > 0.92; }
-  const sp = (run ? RUN : WALK) * mag;
+  let sp = (run ? RUN : WALK) * mag, fwd = iz;
   const fx = -Math.sin(cam.yaw), fz = -Math.cos(cam.yaw), rx = Math.cos(cam.yaw), rz = -Math.sin(cam.yaw);
   let mx = fx * iz + rx * ix, mz = fz * iz + rz * ix; const ml = Math.hypot(mx, mz) || 1; mx /= ml; mz /= ml;
+  /* following a friend: walk after them until you are beside them; any manual input stops it */
+  if (sp > 0.1) { if (group.follow) stopFollow(); }
+  else {
+    const f = followTarget();
+    if (f) { const dx = f.x - player.pos.x, dz = f.z - player.pos.z, d = Math.hypot(dx, dz); if (d > 1.9) { mx = dx / d; mz = dz / d; sp = d > 7 ? RUN : WALK; fwd = 1; } }
+  }
   player.vel.x = damp(player.vel.x, mx * sp, 9, dt); player.vel.y = damp(player.vel.y, mz * sp, 9, dt);
   player.pos.x += player.vel.x * dt; player.pos.z += player.vel.y * dt;
   collide(player.pos, 0.34);
@@ -1552,7 +1609,7 @@ function updatePlayer(dt) {
   else if (player.turnTo !== null) { const d = angleDiff(player.heading, player.turnTo); player.heading += d * (1 - Math.exp(-5 * dt)); if (Math.abs(d) < 0.01) player.turnTo = null; }
   player.y = damp(player.y, groundAt(player.pos.x, player.pos.z), 18, dt);
   if (sp > 0.1 && clock - hintAt > 2.5) dismissHint();
-  if (clock - cam.lastDrag > 1.2 && sp > 0.1 && iz > 0.2) cam.yawT += angleDiff(cam.yawT, player.heading + Math.PI) * (1 - Math.exp(-1.1 * dt * iz));
+  if (clock - cam.lastDrag > 1.2 && sp > 0.1 && fwd > 0.2) cam.yawT += angleDiff(cam.yawT, player.heading + Math.PI) * (1 - Math.exp(-1.1 * dt * fwd));
 }
 
 /* ---------- cameras ---------- */
@@ -1614,6 +1671,7 @@ function enterStreet(instant = false) {
   camTween = instant ? null : { from: camera.position.clone(), look: currentLook.clone(), t: 0, dur: 1.5 };
   player.tag.visible = true; if (!instant) player.rig.hello();
   updateNear(true); showHint(); canvas.focus({ preventScroll: true });
+  onEnteredStreet();
 }
 function showHint() {
   ui.hint.innerHTML = isTouch ? 'Use the <b>joystick</b> to walk · <b>drag</b> to look around' : '<b>W A S D</b> or arrows to walk · <b>Shift</b> to run · <b>drag</b> to look · <b>E</b> at a shop';
@@ -1647,8 +1705,9 @@ function syncCreator() {
 }
 
 /* ---------- shop details ---------- */
-function closeSheets() { ui.shopSheet.classList.remove('open'); ui.dirSheet.classList.remove('open'); renderPrompt(); }
+function closeSheets() { ui.shopSheet.classList.remove('open'); ui.dirSheet.classList.remove('open'); ui.groupSheet.classList.remove('open'); renderPrompt(); }
 function openShop(shop) {
+  sheetShop = shop;
   const cat = CATS[shop.cat];
   const priceLabel = shop.cat === 'rental' ? 'Rent per night' : shop.cat === 'tailor' ? 'Stitching charges' : 'Price range';
   const here = near.shop === shop, goLabel = here && near.inside ? 'Step back outside' : here ? 'Walk inside' : 'Take me there';
@@ -1675,11 +1734,17 @@ function openShop(shop) {
     <p class="demo-note">Sample shop with demo details. Real Gurukul shops will appear here with their own names and information.</p>
   </div>
   <footer class="sheet-foot">
+    <button class="btn star${shortlist.has(shop.id) ? ' on' : ''}" id="starBtn" aria-pressed="${shortlist.has(shop.id)}">${shortlistLabel(shop.id)}</button>
     <button class="btn" id="waBtn">Chat on WhatsApp</button>
     <button class="btn primary" id="goBtn">${goLabel}</button>
   </footer>`;
-  ui.dirSheet.classList.remove('open'); ui.shopSheet.classList.add('open'); renderPrompt();
+  ui.dirSheet.classList.remove('open'); ui.groupSheet.classList.remove('open'); ui.shopSheet.classList.add('open'); renderPrompt();
   $('shopClose').addEventListener('click', closeSheets);
+  $('starBtn').addEventListener('click', () => {
+    toggleShortlist(shop.id);
+    const b = $('starBtn'), on = shortlist.has(shop.id);
+    b.classList.toggle('on', on); b.setAttribute('aria-pressed', String(on)); b.textContent = shortlistLabel(shop.id);
+  });
   $('copyBtn').addEventListener('click', () => {
     const done = () => toast(`Copied ${shop.code}`);
     const fallback = () => { const r = document.createRange(); r.selectNodeContents($('codeText')); const sel = getSelection(); sel.removeAllRanges(); sel.addRange(r); toast('Code selected. Copy it from here.'); };
@@ -1709,7 +1774,7 @@ function travelTo(shop, inside, then) {
 /* ---------- directory ---------- */
 let dirFilter = 'all';
 function openDirectory() {
-  ui.shopSheet.classList.remove('open'); ui.dirSheet.classList.add('open'); renderDirectory(); renderPrompt();
+  ui.shopSheet.classList.remove('open'); ui.groupSheet.classList.remove('open'); ui.dirSheet.classList.add('open'); renderDirectory(); renderPrompt();
   if (!isTouch) $('dirSearch').focus({ preventScroll: true });
 }
 function renderDirectory() {
@@ -1719,7 +1784,7 @@ function renderDirectory() {
   const q = $('dirSearch').value.trim().toLowerCase();
   const list = SHOPS.filter((s) => (dirFilter === 'all' || s.cat === dirFilter) && (!q || `${s.name} ${s.gu} ${CATS[s.cat].label} ${s.specs.join(' ')} ${s.rent ? 'rent rental' : ''}`.toLowerCase().includes(q)));
   $('dirList').innerHTML = list.length
-    ? list.map((s) => `<li><button class="dir-item" data-id="${s.id}"><span class="dir-name">${esc(s.name)}</span><span class="dir-go">Go there</span><span class="dir-meta"><span class="dot" style="--c:${CATS[s.cat].color}"></span>${CATS[s.cat].label} · ${rupee(s.price[0])} to ${rupee(s.price[1])}</span></button></li>`).join('')
+    ? list.map((s) => `<li><button class="dir-item" data-id="${s.id}"><span class="dir-name">${esc(s.name)}${shortlist.has(s.id) ? '<span class="dir-star" aria-label="Shortlisted"> ★</span>' : ''}</span><span class="dir-go">Go there</span><span class="dir-meta"><span class="dot" style="--c:${CATS[s.cat].color}"></span>${CATS[s.cat].label} · ${rupee(s.price[0])} to ${rupee(s.price[1])}</span></button></li>`).join('')
     : `<li class="empty">No shops match “${esc(q)}”. Try “rent”, “saree” or “kids”.</li>`;
 }
 $('dirChips').addEventListener('click', (e) => { const b = e.target.closest('.chip'); if (!b) return; dirFilter = b.dataset.cat; renderDirectory(); });
@@ -1753,6 +1818,15 @@ function drawMap() {
   const [ax, ay] = mapXY(-10.5, 8, w, h), [, by] = mapXY(10.5, 8, w, h);
   g.strokeStyle = 'rgba(255,194,71,.85)'; g.lineWidth = 2; g.beginPath(); g.moveTo(ax, ay); g.lineTo(ax, by); g.stroke();
   const [lx, ly] = mapXY(0, -100, w, h); g.fillStyle = '#ffc247'; g.beginPath(); g.arc(lx, ly, h * 0.09, 0, 7); g.fill();
+  for (const s of SHOPS) if (shortlist.has(s.id)) {
+    const [sx, sy] = mapXY(s.side * 15.5, shopZ(s.slot), w, h);
+    g.fillStyle = '#fbf1e2'; g.font = `${Math.round(h * 0.2)}px system-ui, sans-serif`; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText('★', sx, sy);
+  }
+  for (const f of group.peers.values()) {
+    if (!f.av || !f.seen) continue;
+    const [fx, fy] = mapXY(f.x, f.z, w, h);
+    g.fillStyle = f.cfg.primary; g.strokeStyle = '#fbf1e2'; g.lineWidth = 2; g.beginPath(); g.arc(fx, fy, h * 0.075, 0, 7); g.fill(); g.stroke();
+  }
   const [px, py] = mapXY(player.pos.x, player.pos.z, w, h), s = h * 0.13;
   g.save(); g.translate(px, py); g.rotate(Math.atan2(Math.sin(player.heading), -Math.cos(player.heading)));
   g.fillStyle = '#fbf1e2'; g.strokeStyle = '#16112a'; g.lineWidth = 2;
@@ -1804,6 +1878,7 @@ function frame(now) {
   }
   if (state === 'creator' && !pointers.size && !reduceMotion) spin.a += 0.28 * dt;
   updateNPCs(dt);
+  updateGroup(dt);
   keeper.rig.update(dt, 0);
   for (const s of SHOPS) { s.glow = damp(s.glow, s === near.shop && state === 'play' ? 1 : 0, 6, dt); s.signMat.emissiveIntensity = 0.5 + 0.5 * s.glow; }
   if (!reduceMotion) { beam.rotation.y += dt * 0.5; twinkle(clock); }
@@ -1814,6 +1889,367 @@ function frame(now) {
   if (useBloom) composer.render(); else renderer.render(scene, camera);
   if (state === 'play' && ++mapTick % 3 === 0) drawMap();
   perf(dt);
+}
+
+/* ================= SHOP TOGETHER ================= */
+/* Friends' phones connect to each other directly (WebRTC). Public relays only help them find each other;
+   the room code doubles as the password, so the relays never see what is said. */
+const TRYSTERO_URL = 'https://cdn.jsdelivr.net/npm/@trystero-p2p/nostr@0.26.0/+esm';
+const APP_ID = 'faro-ahmedabad-gurukul-v1';
+const MAX_FRIENDS = 7;
+const SITE_URL = location.origin + location.pathname;
+const REACTIONS = [
+  { t: '❤️', emo: true, label: 'Love it' },
+  { t: '👀', emo: true, label: 'Look at this' },
+  { t: 'This one?' },
+  { t: 'Let’s go inside' },
+  { t: 'Over here!' },
+];
+const group = { room: null, code: null, peers: new Map(), follow: null, joining: false, joinedAt: 0, invited: false, teleported: false, actions: null, sendT: 0, idleT: 0, lastSent: '', slowWarned: false, whereT: 0 };
+const shortlist = new Map(); /* shop id → who added it ('' means you) */
+const selfBubble = { bubble: null, bubbleT: 0 };
+let pendingCode = null, announceT = 0, sheetShop = null;
+const noop = () => {};
+
+const genCode = () => { const a = 'abcdefghjkmnpqrstuvwxyz23456789'; let s = ''; const r = crypto.getRandomValues(new Uint8Array(6)); for (const b of r) s += a[b % a.length]; return s; };
+const parseCode = (h) => { const m = /^#together-([a-z2-9]{6})$/.exec(h || ''); return m ? m[1] : null; };
+const groupLink = () => `${SITE_URL}#together-${group.code}`;
+const displayName = () => name.trim().slice(0, 16) || 'Friend';
+const cleanName = (n) => String(n ?? '').replace(/[\u0000-\u001f\u007f<>]/g, '').trim().slice(0, 16) || 'Friend';
+function cleanCfg(c) {
+  c = c && typeof c === 'object' ? c : {};
+  const ok = (v, list) => (list.includes(v) ? v : list[0]);
+  return { outfit: ok(c.outfit, OUTFITS.map((o) => o.id)), primary: ok(c.primary, PRIMARY.map((p) => p[1])), accent: ok(c.accent, ACCENT.map((p) => p[1])), skin: ok(c.skin, SKIN), hair: ok(c.hair, HAIR.map((h) => h[0])) };
+}
+const friends = () => [...group.peers.values()].filter((p) => p.av);
+
+/* ---------- invite links ---------- */
+function checkInvite() {
+  pendingCode = parseCode(location.hash);
+  if (pendingCode) { ui.inviteNote.hidden = false; $('startBtn').textContent = 'Make your avatar and join'; }
+}
+function onEnteredStreet() {
+  if (pendingCode && !group.room && !group.joining) { const c = pendingCode; pendingCode = null; ui.inviteNote.hidden = true; joinGroup(c, true); }
+}
+addEventListener('hashchange', () => {
+  const c = parseCode(location.hash);
+  if (!c || c === group.code) return;
+  if (state === 'play') joinGroup(c, true); else checkInvite();
+});
+addEventListener('pagehide', () => { try { group.room?.leave(); } catch { /* closing anyway */ } });
+
+/* ---------- joining and leaving ---------- */
+function startGroup() { joinGroup(genCode(), false); }
+async function joinGroup(code, invited) {
+  if (group.room || group.joining) await leaveGroup(true);
+  Object.assign(group, { code, invited, teleported: false, joining: true, joinedAt: clock, slowWarned: false });
+  history.replaceState(null, '', '#together-' + code);
+  setStatus(); renderGroupIfOpen();
+  let lib;
+  try { lib = await import(TRYSTERO_URL); }
+  catch { if (group.code === code) { group.joining = false; group.code = null; history.replaceState(null, '', SITE_URL); setStatus(); renderGroupIfOpen(); } toast("Couldn't load group shopping. Check your internet and try again."); return; }
+  if (group.code !== code) return;
+  let room;
+  try {
+    room = lib.joinRoom({ appId: APP_ID, password: code }, code, { onJoinError: () => toast("Couldn't connect to that group. Ask your friend for a fresh link.") });
+  } catch {
+    group.joining = false; group.code = null; setStatus(); renderGroupIfOpen();
+    toast("This browser can't do group shopping. Try a recent Chrome or Safari."); return;
+  }
+  group.room = room; group.joining = false; group.joinedAt = clock;
+  const act = (ns, fn) => { const a = room.makeAction(ns); a.onMessage = (d, ctx) => { try { fn(d, ctx.peerId); } catch { /* ignore malformed messages */ } }; return a; };
+  group.actions = { hello: act('hello', onHello), pos: act('pos', onPos), react: act('react', onReact), pin: act('pin', onPin) };
+  room.onPeerJoin = (id) => { sendHello(id); sendPins(id); sendPos(id); };
+  room.onPeerLeave = (id) => removePeer(id, true);
+  ui.react.hidden = false;
+  setStatus(); renderGroupIfOpen();
+  if (invited) toast('Joining your friend’s group…');
+}
+async function leaveGroup(silent) {
+  const room = group.room;
+  Object.assign(group, { room: null, code: null, actions: null, follow: null, joining: false });
+  for (const id of [...group.peers.keys()]) removePeer(id, false);
+  if (room) { try { await room.leave(); } catch { /* already gone */ } }
+  history.replaceState(null, '', SITE_URL);
+  ui.react.hidden = true; toggleTray(false); setStatus();
+  if (!silent) { toast('You left the group'); renderGroupIfOpen(); }
+}
+function setStatus() {
+  const on = !!(group.room || group.joining), n = friends().length;
+  ui.groupDot.hidden = !on; ui.groupDot.classList.toggle('wait', on && n === 0);
+  $('groupBtn').setAttribute('aria-label', !on ? 'Shop together' : n ? `Shop together: ${n} friend${n > 1 ? 's' : ''} here` : 'Shop together: waiting for friends');
+}
+
+/* ---------- messages ---------- */
+const send = (ns, data, target) => { if (group.actions) group.actions[ns].send(data, target ? { target } : undefined).catch(noop); };
+const sendHello = (target) => send('hello', { v: 1, name: displayName(), cfg }, target);
+const sendPins = (target) => { if (shortlist.size) send('pin', { all: [...shortlist.keys()] }, target); };
+const posMsg = () => [+player.pos.x.toFixed(2), +player.pos.z.toFixed(2), +player.y.toFixed(2), +(((player.heading % 6.2832) + 6.2832) % 6.2832).toFixed(3), +(state === 'play' ? player.speed : 0).toFixed(2)];
+const sendPos = (target) => send('pos', posMsg(), target);
+function groupAnnounce() { if (!group.room) return; clearTimeout(announceT); announceT = setTimeout(() => sendHello(), 300); }
+
+function onHello(d, id) {
+  if (!d || typeof d !== 'object') return;
+  let p = group.peers.get(id);
+  const nc = cleanCfg(d.cfg), nm = cleanName(d.name);
+  if (!p) {
+    if (group.peers.size >= MAX_FRIENDS) return;
+    p = { id, x: 0, z: 0, y: 0, heading: 0, tx: 0, tz: 0, ty: 0, th: 0, ts: 0, seen: false, cfg: null, name: '', av: null, rig: null, tag: null, bubble: null, bubbleT: 0, lastReact: -9 };
+    group.peers.set(id, p);
+    toast(`${nm} joined the group`);
+  }
+  if (!p.av || JSON.stringify(nc) !== JSON.stringify(p.cfg)) {
+    disposePeerAvatar(p);
+    p.av = bakeRig(buildAvatar(nc)); p.rig = new Rig(p.av); p.av.root.visible = p.seen; scene.add(p.av.root);
+    if (p.seen) p.av.root.position.set(p.x, p.y, p.z);
+  }
+  if (nm !== p.name || !p.tag || p.tag.parent !== p.av.root) {
+    if (p.tag) { p.tag.material.map.dispose(); p.tag.material.dispose(); p.tag.removeFromParent(); }
+    p.tag = makeTag(nm, nc.primary); p.av.root.add(p.tag);
+  }
+  p.cfg = nc; p.name = nm;
+  setStatus(); renderGroupIfOpen();
+}
+function onPos(d, id) {
+  const p = group.peers.get(id);
+  if (!p || !p.av || !Array.isArray(d) || d.length !== 5 || !d.every(Number.isFinite)) return;
+  const [x, z, y, h, s] = d;
+  p.tx = clamp(x, -25, 25); p.tz = clamp(z, -115, 30); p.ty = clamp(y, 0, 1); p.th = h; p.ts = clamp(s, 0, 8);
+  if (!p.seen || Math.hypot(p.tx - p.x, p.tz - p.z) > 8) { p.x = p.tx; p.z = p.tz; p.y = p.ty; p.heading = p.th; }
+  if (!p.seen) {
+    p.seen = true; p.av.root.visible = true; setStatus(); renderGroupIfOpen();
+    if (group.invited && !group.teleported && state === 'play') { group.teleported = true; goToFriend(p); toast(`You're with ${p.name} now`); }
+  }
+}
+function onReact(d, id) {
+  const p = group.peers.get(id), i = d && Number.isInteger(d.i) ? d.i : -1;
+  if (!p || !p.av || !REACTIONS[i] || clock - p.lastReact < 0.4) return;
+  p.lastReact = clock; showBubble(p, i);
+  if (Math.hypot(p.x - player.pos.x, p.z - player.pos.z) > 14) toast(`${p.name}: ${REACTIONS[i].label || REACTIONS[i].t}`);
+}
+function onPin(d, id) {
+  const p = group.peers.get(id); if (!p || !d || typeof d !== 'object') return;
+  const valid = (sid) => typeof sid === 'string' && SHOPS.some((s) => s.id === sid);
+  if (Array.isArray(d.all)) { let added = 0; for (const sid of d.all.slice(0, SHOPS.length)) if (valid(sid) && !shortlist.has(sid)) { shortlist.set(sid, p.name); added++; } if (!added) return; }
+  else {
+    if (!valid(d.id)) return;
+    const shop = SHOPS.find((s) => s.id === d.id);
+    if (d.on === true) { shortlist.set(d.id, p.name); toast(`${p.name} shortlisted ${shop.name}`); }
+    else if (d.on === false) { shortlist.delete(d.id); toast(`${p.name} removed ${shop.name} from the shortlist`); }
+    else return;
+  }
+  saveShortlist(); refreshShortlistViews();
+}
+function removePeer(id, announce) {
+  const p = group.peers.get(id); if (!p) return;
+  disposePeerAvatar(p); group.peers.delete(id);
+  if (group.follow === id) group.follow = null;
+  if (announce && p.name) toast(`${p.name} left the group`);
+  setStatus(); renderGroupIfOpen();
+}
+function disposePeerAvatar(p) {
+  if (!p.av) return;
+  p.av.root.traverse((o) => { if (o.isMesh) o.geometry.dispose(); if (o.isSprite) { o.material.map?.dispose(); o.material.dispose(); } });
+  p.av.root.removeFromParent(); p.av = null; p.tag = null; p.bubble = null;
+}
+
+/* ---------- following and meeting up ---------- */
+function followTarget() { if (!group.follow) return null; const p = group.peers.get(group.follow); return p && p.seen ? p : null; }
+function startFollow(id) { const p = group.peers.get(id); if (!p) return; group.follow = id; closeSheets(); toast(`Following ${p.name}. Move yourself to stop.`); }
+function stopFollow() { if (!group.follow) return; group.follow = null; renderGroupIfOpen(); }
+function goToFriend(p) {
+  if (traveling || !p.seen) return; traveling = true; ui.fade.classList.add('on');
+  setTimeout(() => {
+    const h = p.heading;
+    player.pos.set(p.x - Math.sin(h) * 1.4 - Math.cos(h) * 0.9, 0, p.z - Math.cos(h) * 1.4 + Math.sin(h) * 0.9);
+    collide(player.pos, 0.34);
+    player.vel.set(0, 0); player.turnTo = null; player.heading = h; player.y = groundAt(player.pos.x, player.pos.z);
+    cam.yaw = cam.yawT = h + Math.PI; cam.pitch = cam.pitchT = 0.3; cam.cur = 4;
+    cam.target.set(player.pos.x, player.y + 1.45, player.pos.z); camTween = null;
+    updateNear(true);
+    setTimeout(() => { ui.fade.classList.remove('on'); traveling = false; }, 140);
+  }, 320);
+}
+function whereIs(x, z) {
+  const r = shopAt(x, z);
+  if (r.shop) return (r.inside ? 'Inside ' : 'Outside ') + r.shop.name;
+  if (z > 7) return 'At the entrance arch';
+  if (z < STREET_END) return 'By the lighthouse';
+  return 'On the street';
+}
+
+/* ---------- reactions ---------- */
+const bubbleTex = new Map();
+function bubbleTexture(i) {
+  if (bubbleTex.has(i)) return bubbleTex.get(i);
+  const r = REACTIONS[i], c = document.createElement('canvas'); c.width = 512; c.height = 160; const g = c.getContext('2d');
+  g.font = r.emo ? '92px "Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",sans-serif' : '700 60px "Hind Vadodara", system-ui, sans-serif';
+  const w = Math.min(500, g.measureText(r.t).width + (r.emo ? 70 : 84)), h = 128, x = (512 - w) / 2, y = 6;
+  g.fillStyle = '#fbf1e2'; g.beginPath(); if (g.roundRect) g.roundRect(x, y, w, h, 64); else g.rect(x, y, w, h); g.fill();
+  g.beginPath(); g.moveTo(240, y + h - 2); g.lineTo(256, y + h + 22); g.lineTo(272, y + h - 2); g.fill();
+  g.fillStyle = '#16112a'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText(r.t, 256, y + h / 2 + (r.emo ? 8 : 4));
+  const t = canvasTex(c); bubbleTex.set(i, t); return t;
+}
+function showBubble(p, i) {
+  const holder = p || selfBubble, root = p ? p.av?.root : player.av?.root; if (!root) return;
+  if (holder.bubble) { holder.bubble.removeFromParent(); holder.bubble.material.dispose(); }
+  const s = new THREE.Sprite(new THREE.SpriteMaterial({ map: bubbleTexture(i), transparent: true, depthWrite: false }));
+  s.position.y = 2.7; s.renderOrder = 11; s.scale.set(0.01, 0.01, 1); root.add(s);
+  holder.bubble = s; holder.bubbleT = 3.2;
+}
+function tickBubble(holder, dt) {
+  if (!holder.bubble) return;
+  holder.bubbleT -= dt;
+  if (holder.bubbleT <= 0) { holder.bubble.removeFromParent(); holder.bubble.material.dispose(); holder.bubble = null; return; }
+  const k = Math.min(1, (3.2 - holder.bubbleT) / 0.18), pop = k < 1 ? k * (1.15 - 0.15 * k) : 1;
+  holder.bubble.scale.set(1.5 * pop, 0.47 * pop, 1);
+  holder.bubble.material.opacity = Math.min(1, holder.bubbleT / 0.4);
+}
+function sendReaction(i) {
+  if (!group.room || !REACTIONS[i]) return;
+  showBubble(null, i); send('react', { i }); toggleTray(false);
+}
+function toggleTray(force) {
+  const open = force ?? ui.reactTray.hidden;
+  if (open && !ui.reactTray.childElementCount) {
+    ui.reactTray.innerHTML = REACTIONS.map((r, i) => `<button data-i="${i}" class="${r.emo ? 'emo' : ''}" aria-label="${esc(r.label || r.t)}">${r.t}${isTouch ? '' : `<kbd>${i + 1}</kbd>`}</button>`).join('');
+  }
+  ui.reactTray.hidden = !open; ui.reactBtn.setAttribute('aria-expanded', String(open));
+}
+ui.reactBtn.addEventListener('click', () => toggleTray());
+ui.reactTray.addEventListener('click', (e) => { const b = e.target.closest('button'); if (b) sendReaction(Number(b.dataset.i)); });
+
+/* ---------- shortlist (shared while in a group, saved on this device) ---------- */
+const SL_KEY = 'faro-gurukul-shortlist-v1';
+function loadShortlist() {
+  try { const a = JSON.parse(localStorage.getItem(SL_KEY) || '[]'); if (Array.isArray(a)) for (const id of a) if (SHOPS.some((s) => s.id === id)) shortlist.set(id, ''); } catch { /* storage blocked */ }
+}
+function saveShortlist() { try { localStorage.setItem(SL_KEY, JSON.stringify([...shortlist.keys()])); } catch { /* storage blocked */ } }
+const shortlistLabel = (id) => (shortlist.has(id) ? '★ Shortlisted' : '☆ Shortlist');
+function toggleShortlist(id) {
+  const on = !shortlist.has(id);
+  if (on) shortlist.set(id, ''); else shortlist.delete(id);
+  saveShortlist(); send('pin', { id, on });
+  if (on && friends().length) toast('Added to your group’s shortlist');
+  refreshShortlistViews();
+}
+function refreshShortlistViews() {
+  if (ui.dirSheet.classList.contains('open')) renderDirectory();
+  renderGroupIfOpen();
+  const b = $('starBtn');
+  if (b && sheetShop && ui.shopSheet.classList.contains('open')) {
+    const on = shortlist.has(sheetShop.id); b.classList.toggle('on', on); b.setAttribute('aria-pressed', String(on)); b.textContent = shortlistLabel(sheetShop.id);
+  }
+}
+
+/* ---------- the group sheet ---------- */
+function openGroup() {
+  ui.shopSheet.classList.remove('open'); ui.dirSheet.classList.remove('open');
+  renderGroup(); ui.groupSheet.classList.add('open'); renderPrompt();
+  ui.groupSheet.querySelector('.close')?.focus({ preventScroll: true });
+}
+function renderGroupIfOpen() { if (ui.groupSheet.classList.contains('open')) renderGroup(); }
+function memberRow(p, you) {
+  const c = you ? cfg : p.cfg, nm = you ? `${displayName()} (you)` : p.name;
+  const where = you ? whereIs(player.pos.x, player.pos.z) : p.seen ? whereIs(p.x, p.z) : 'Connecting…';
+  const actions = you ? '' : `<div class="member-actions">
+      <button class="btn" data-act="goto" data-id="${esc(p.id)}" ${p.seen ? '' : 'disabled'}>Go to</button>
+      <button class="btn${group.follow === p.id ? ' on' : ''}" data-act="follow" data-id="${esc(p.id)}" aria-pressed="${group.follow === p.id}" ${p.seen ? '' : 'disabled'}>${group.follow === p.id ? 'Following' : 'Follow'}</button>
+    </div>`;
+  return `<li class="member"><span class="member-av" style="--c:${c.primary};--c2:${c.accent}" aria-hidden="true"></span>
+    <div style="min-width:0"><p class="member-name">${esc(nm)}</p><p class="member-sub" data-where="${you ? 'me' : esc(p.id)}">${esc(where)}</p></div>${actions}</li>`;
+}
+function renderGroup() {
+  const head = (eyebrow, title) => `<header class="sheet-head"><p class="eyebrow">${eyebrow}</p><h2>${title}</h2><button class="btn icon close" data-act="close" aria-label="Close">✕</button></header>`;
+  if (!group.room && !group.joining) {
+    ui.groupSheet.innerHTML = `${head('Shop together', 'Bring your friends')}
+    <div class="sheet-body">
+      <p style="margin:0;color:var(--chalk-2)">Start a group and share the link. Friends who open it walk the street with you, can follow you into shops, react to outfits and build one shortlist together.</p>
+      <ol class="steps"><li>Start a group</li><li>Send the link on WhatsApp</li><li>Shop together, wherever everyone is</li></ol>
+      <p class="note">Groups are private: only people with your link can join, up to 8 people. Nobody needs an account.</p>
+    </div>
+    <footer class="sheet-foot"><button class="btn primary" data-act="start">Start a group</button></footer>`;
+    return;
+  }
+  if (group.joining) {
+    ui.groupSheet.innerHTML = `${head('Shop together', 'Connecting…')}<div class="sheet-body"><p class="note">Setting up your group. This takes a few seconds.</p></div>`;
+    return;
+  }
+  const fs = friends(), link = groupLink(), slow = !fs.length && clock - group.joinedAt > 25;
+  const wa = 'https://wa.me/?text=' + encodeURIComponent(`Come shop with me on Gurukul Street 🛍️ ${link}`);
+  const sl = SHOPS.filter((s) => shortlist.has(s.id));
+  ui.groupSheet.innerHTML = `${head(`Your group · ${group.code}`, 'Shop together')}
+  <div class="sheet-body">
+    <section class="link-box" aria-label="Invite link">
+      <span class="link-text" id="groupLinkText">${esc(link)}</span>
+      <div class="link-actions">
+        <a class="btn primary" href="${esc(wa)}" target="_blank" rel="noopener">Send on WhatsApp</a>
+        <button class="btn" data-act="copy">Copy link</button>
+        ${navigator.share ? '<button class="btn" data-act="share">Share…</button>' : ''}
+      </div>
+    </section>
+    <section class="sec"><h3>In this group · ${fs.length + 1}</h3>
+      <ul class="members">${memberRow(null, true)}${fs.map((p) => memberRow(p, false)).join('')}</ul>
+      ${fs.length ? '' : `<p class="note${slow ? ' warn' : ''}" style="margin-top:10px">${slow
+        ? 'Taking a while? Phones connect to each other directly, and some mobile networks block that. Try with one phone on Wi-Fi, then open the link again.'
+        : 'Waiting for friends to open your link…'}</p>`}
+    </section>
+    <section class="sec"><h3>Group shortlist · ${sl.length}</h3>
+      ${sl.length ? `<ul class="members">${sl.map((s) => `<li class="member"><span class="member-av" style="--c:${CATS[s.cat].color};--c2:${CATS[s.cat].color}" aria-hidden="true"></span>
+        <div style="min-width:0"><p class="member-name">${esc(s.name)}</p><p class="member-sub">${esc(CATS[s.cat].label)} · added by ${shortlist.get(s.id) ? esc(shortlist.get(s.id)) : 'you'}</p></div>
+        <div class="member-actions"><button class="btn" data-act="shop" data-id="${s.id}">Go</button></div></li>`).join('')}</ul>`
+      : '<p class="note">Tap ☆ Shortlist on any shop and it shows up here for everyone in the group.</p>'}
+    </section>
+    <p class="note">Send reactions with the 😊 button${isTouch ? '' : ', or keys 1 to 5'}. They pop up above your avatar for everyone.</p>
+  </div>
+  <footer class="sheet-foot"><button class="btn" data-act="leave">Leave group</button></footer>`;
+}
+ui.groupSheet.addEventListener('click', (e) => {
+  const b = e.target.closest('[data-act]'); if (!b) return;
+  const act = b.dataset.act, p = b.dataset.id ? group.peers.get(b.dataset.id) : null;
+  if (act === 'close') closeSheets();
+  if (act === 'start') startGroup();
+  if (act === 'leave') leaveGroup(false);
+  if (act === 'goto' && p) { closeSheets(); goToFriend(p); }
+  if (act === 'follow' && p) { if (group.follow === p.id) stopFollow(); else startFollow(p.id); }
+  if (act === 'shop') { const shop = SHOPS.find((s) => s.id === b.dataset.id); if (shop) { closeSheets(); travelTo(shop, false, () => openShop(shop)); } }
+  if (act === 'copy') {
+    const link = groupLink();
+    const fallback = () => { const r = document.createRange(); r.selectNodeContents($('groupLinkText')); const sel = getSelection(); sel.removeAllRanges(); sel.addRange(r); toast('Link selected. Copy it from here.'); };
+    try { navigator.clipboard.writeText(link).then(() => toast('Link copied. Send it to your friends.'), fallback); } catch { fallback(); }
+  }
+  if (act === 'share') navigator.share({ title: 'Shop with me on Gurukul Street', text: 'Come shop with me on Gurukul Street 🛍️', url: groupLink() }).catch(noop);
+});
+$('groupBtn').addEventListener('click', openGroup);
+
+/* ---------- per frame ---------- */
+function updateGroup(dt) {
+  tickBubble(selfBubble, dt);
+  if (!group.room) return;
+  group.sendT -= dt; group.idleT -= dt;
+  if (state === 'play' && group.sendT <= 0) {
+    group.sendT = 0.1;
+    const msg = posMsg(), key = msg.join(',');
+    if (key !== group.lastSent || group.idleT <= 0) { send('pos', msg); group.lastSent = key; group.idleT = 1; }
+  }
+  const k = 1 - Math.exp(-10 * dt);
+  for (const p of group.peers.values()) {
+    if (!p.av || !p.seen) continue;
+    p.x += (p.tx - p.x) * k; p.z += (p.tz - p.z) * k; p.y += (p.ty - p.y) * k; p.heading += angleDiff(p.heading, p.th) * k;
+    p.av.root.position.set(p.x, p.y, p.z); p.av.root.rotation.y = p.heading;
+    p.rig.update(dt, p.ts);
+    tickBubble(p, dt);
+  }
+  if (!friends().length && !group.slowWarned && clock - group.joinedAt > 25) {
+    group.slowWarned = true;
+    if (ui.groupSheet.classList.contains('open')) renderGroup();
+    else if (group.invited) toast('Still connecting to your friend. Some mobile networks block this; try Wi-Fi on one phone.');
+  }
+  if ((group.whereT -= dt) <= 0 && ui.groupSheet.classList.contains('open')) {
+    group.whereT = 1;
+    const me = ui.groupSheet.querySelector('[data-where="me"]'); if (me) me.textContent = whereIs(player.pos.x, player.pos.z);
+    for (const p of group.peers.values()) { const el = ui.groupSheet.querySelector(`[data-where="${CSS.escape(p.id)}"]`); if (el && p.seen) el.textContent = whereIs(p.x, p.z); }
+  }
 }
 
 /* ---------- boot ---------- */
@@ -1830,6 +2266,7 @@ async function boot(data = {}) {
   if (saved && saved.cfg) { cfg = { ...cfg, ...saved.cfg }; name = saved.name || ''; }
   $('nameInput').value = name;
   ui.joy.hidden = !isTouch;
+  loadShortlist(); checkInvite();
   setPlayerAvatar(); buildCreatorUI(); applySize();
   renderer.compile(scene, camera);
   last = performance.now(); requestAnimationFrame(frame);

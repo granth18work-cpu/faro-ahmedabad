@@ -16,6 +16,7 @@ Project 01 of Faro Ahmedabad · Gurukul Road, Memnagar
 - **The lighthouse:** a Faro lighthouse with a turning beam at the end of the street.
 - **Find a shop:** search with category filters, plus a clickable mini map. Both take you straight to a shop.
 - **Shop panel:** price range, timings, rent, alterations, what the shop is known for, a Faro code with its offer, and a WhatsApp button (demo only).
+- **Shop together (added 20 October 2026):** start a group, send the link on WhatsApp, and friends who open it appear on the same street with their own avatars and name tags. Anyone can **Go to** a friend or **Follow** them, send reactions (❤️, 👀, "This one?", "Let's go inside", "Over here!") that pop up above their avatar, and build one shared **shortlist** of shops. Up to 8 people, private by link, no accounts. Phones connect directly to each other (WebRTC through the Trystero library); public relays only help them find each other, and the room code encrypts that step. Some mobile networks block direct connections; if friends can't see each other, one of them should try Wi-Fi.
 - **Smoothness:** ran at a steady 60 fps on a Mac. On slower devices it automatically lowers quality step by step instead of stuttering.
 
 ## Controls
@@ -27,6 +28,8 @@ Project 01 of Faro Ahmedabad · Gurukul Road, Memnagar
 | Look around | Drag with the mouse, scroll to zoom | Drag, pinch to zoom |
 | Open a shop | E when you're in front of it | Tap "View shop" |
 | Find a shop | F | "Find a shop" button |
+| Shop together | G | "Together" button |
+| Send a reaction (in a group) | Keys 1 to 5, or the 😊 button | 😊 button |
 
 ## Sample data
 
