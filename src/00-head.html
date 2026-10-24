@@ -1,0 +1,327 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Faro Gurukul Street</title>
+<meta name="description" content="Walk or ride a scooter down Gurukul Road, Memnagar, in realistic 3D. Make an avatar, browse its clothing boutiques and shop together with friends. A Faro Ahmedabad project by The Dry Text Co.">
+<meta name="robots" content="noindex">
+<meta name="theme-color" content="#141416">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%2316112a'/%3E%3Ccircle cx='32' cy='32' r='18' fill='none' stroke='%23ffc247' stroke-opacity='.4' stroke-width='5'/%3E%3Ccircle cx='32' cy='32' r='9' fill='%23ffc247'/%3E%3C/svg%3E">
+<link rel="canonical" href="https://faro-ahmedabad.thedrytextco.online/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Faro Ahmedabad">
+<meta property="og:title" content="Faro · Gurukul Street">
+<meta property="og:description" content="Walk or ride a scooter down Gurukul Road, Memnagar, in realistic 3D. Make an avatar, browse its clothing boutiques and shop together with friends. A Faro Ahmedabad project by The Dry Text Co.">
+<meta property="og:url" content="https://faro-ahmedabad.thedrytextco.online/">
+<meta property="og:image" content="https://faro-ahmedabad.thedrytextco.online/og-image.jpg">
+<meta property="og:image:width" content="800">
+<meta property="og:image:height" content="420">
+<meta name="twitter:card" content="summary_large_image">
+<style>[hidden]{display:none!important}</style>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Archivo:wght@600;700;800&family=Hind+Vadodara:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500&display=swap">
+<style>
+/* Layout: full-bleed 3D street at dusk; UI floats as smoked-glass panels pinned to the edges, bottom sheets on phones */
+:root{
+  --night:#141416;
+  --glass:rgba(22,22,24,.72);
+  --glass-strong:rgba(20,20,22,.93);
+  --saffron:#c4a26a;
+  --marigold:#d9bf8c;
+  --rani:#b5566a;
+  --chalk:#f2efe8;
+  --chalk-2:rgba(242,239,232,.74);
+  --chalk-3:rgba(242,239,232,.52);
+  --line:rgba(242,239,232,.14);
+  --f-display:"Cormorant Garamond", Georgia, "Times New Roman", serif;
+  --f-body:"Hind Vadodara", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --f-mono:"IBM Plex Mono", ui-monospace, Menlo, Consolas, monospace;
+  --r-panel:20px;
+  --r-ctl:12px;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{margin:0;background:var(--night);color:var(--chalk);font:400 15px/1.5 var(--f-body);overflow:hidden;-webkit-font-smoothing:antialiased;-webkit-tap-highlight-color:transparent}
+#scene{position:fixed;inset:0;width:100%;height:100%;display:block;outline:none;touch-action:none;cursor:grab}
+#scene.dragging{cursor:grabbing}
+button,input{font:inherit;color:inherit}
+kbd{font:500 11px/1 var(--f-mono);padding:3px 5px;border-radius:5px;border:1px solid currentColor;opacity:.7}
+.eyebrow{margin:0;font:600 12px/1.2 var(--f-body);letter-spacing:.14em;text-transform:uppercase;color:var(--marigold)}
+.gu{font-family:var(--f-body);font-weight:600}
+
+.btn{text-decoration:none;display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:44px;padding:0 18px;border-radius:999px;border:1px solid var(--line);background:rgba(242,239,232,.07);cursor:pointer;font-weight:600;white-space:nowrap;transition:transform .15s ease,background .15s ease,border-color .15s ease}
+.btn:hover{background:rgba(242,239,232,.14)}
+.btn:active{transform:scale(.97)}
+.btn.primary{background:var(--saffron);color:var(--night);border-color:transparent}
+.btn.primary:hover{background:var(--marigold)}
+.btn.sm{min-height:38px;padding:0 14px;font-size:14px}
+.btn.icon{width:44px;padding:0}
+.btn:focus-visible,.opt:focus-visible,.sw:focus-visible,input:focus-visible,.dir-item:focus-visible,.chip:focus-visible{outline:2px solid var(--marigold);outline-offset:2px}
+.glass{background:var(--glass);-webkit-backdrop-filter:blur(16px) saturate(1.2);backdrop-filter:blur(16px) saturate(1.2);border:1px solid var(--line)}
+
+/* loader */
+.loader{position:fixed;inset:0;z-index:20;display:grid;place-items:center;align-content:center;gap:18px;background:var(--night);transition:opacity .6s ease}
+.loader.done{opacity:0;pointer-events:none}
+.loader p{margin:0;color:var(--chalk-2)}
+.loader-mark{width:46px;height:46px;border-radius:50%;background:radial-gradient(circle at 50% 50%,var(--marigold) 0 22%,transparent 23%),conic-gradient(from 0deg,transparent 0 70%,rgba(217,191,140,.9) 85%,transparent 100%);animation:sweep 1.4s linear infinite}
+@keyframes sweep{to{transform:rotate(360deg)}}
+
+/* intro */
+.scrim{position:fixed;inset:0;pointer-events:none;z-index:3;background:radial-gradient(120% 85% at 0% 100%,rgba(16,16,18,.88) 0%,rgba(16,16,18,.45) 42%,transparent 70%);transition:opacity .8s ease}
+.scrim.off{opacity:0}
+.intro{position:fixed;left:0;bottom:0;z-index:5;display:grid;gap:14px;max-width:640px;padding:0 clamp(16px,5vw,64px) calc(clamp(28px,7vh,80px) + env(safe-area-inset-bottom,0px))}
+.intro h1{margin:0;font:600 clamp(56px,10vw,112px)/.9 var(--f-display);letter-spacing:-.015em;text-wrap:balance;text-shadow:0 6px 40px rgba(16,16,18,.6)}
+.intro h1 span{color:var(--marigold)}
+.intro .gu{margin:0;font-size:clamp(18px,2.6vw,24px);color:var(--chalk-2)}
+.intro .lede{margin:4px 0 6px;max-width:46ch;font-size:17px;color:var(--chalk-2)}
+.intro .row{display:flex;flex-wrap:wrap;align-items:center;gap:12px 18px}
+.intro .meta{font-size:13px;color:var(--chalk-3)}
+
+/* avatar creator */
+.creator{position:fixed;top:16px;right:16px;bottom:16px;z-index:6;width:min(380px,calc(100vw - 32px));display:flex;flex-direction:column;overflow:hidden;border-radius:var(--r-panel);box-shadow:0 24px 70px rgba(0,0,0,.5)}
+.panel-head{padding:20px 22px 6px;display:grid;gap:4px}
+.panel-head h2{margin:0;font:600 32px/1.05 var(--f-display)}
+.panel-body{flex:1;min-height:0;overflow-y:auto;grid-auto-rows:max-content;padding:12px 22px 18px;display:grid;gap:18px;align-content:start}
+.group{display:grid;gap:8px;min-width:0}
+.group-label{display:flex;justify-content:space-between;gap:8px;font-size:13px;font-weight:600;color:var(--chalk-2)}
+.group-label output{font-weight:500;color:var(--chalk-3)}
+.opts{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.opts.three{grid-template-columns:repeat(3,minmax(0,1fr))}
+.opt{min-height:48px;padding:6px 12px;border-radius:var(--r-ctl);border:1px solid var(--line);background:rgba(242,239,232,.04);cursor:pointer;text-align:left;display:flex;flex-direction:column;justify-content:center;font-weight:600;font-size:14px;line-height:1.2}
+.opt small{font-weight:400;font-size:12px;color:var(--chalk-3)}
+.opt[aria-pressed="true"]{border-color:var(--saffron);background:rgba(196,162,106,.16)}
+.swatches{display:flex;flex-wrap:wrap;gap:10px}
+.sw{width:34px;height:34px;border-radius:50%;padding:0;cursor:pointer;border:2px solid rgba(242,239,232,.28);background:var(--c)}
+.sw[aria-pressed="true"]{box-shadow:0 0 0 2px var(--night),0 0 0 4px var(--marigold)}
+.field{display:grid;gap:8px;font-size:13px;font-weight:600;color:var(--chalk-2)}
+.field input{width:100%;min-height:44px;padding:0 14px;border-radius:var(--r-ctl);border:1px solid var(--line);background:rgba(242,239,232,.07);color:var(--chalk);font-size:16px;font-weight:500}
+.panel-foot{display:flex;gap:10px;padding:14px 22px calc(16px + env(safe-area-inset-bottom,0px));border-top:1px solid var(--line)}
+.panel-foot .primary{flex:1}
+
+/* in-world HUD */
+.hud{position:fixed;inset:0;z-index:4;pointer-events:none}
+.hud-tl{position:absolute;top:calc(14px + env(safe-area-inset-top,0px));left:16px;display:grid;gap:10px;justify-items:start;pointer-events:auto}
+.brand{display:flex;align-items:center;gap:10px;padding:7px 14px 7px 8px;border-radius:999px;font-size:14px;color:var(--chalk-2)}
+.brand b{font:700 19px/1 var(--f-display);color:var(--marigold);letter-spacing:.02em}
+.brand-mark{width:24px;height:24px;border-radius:50%;background:radial-gradient(circle,var(--marigold) 0 30%,rgba(217,191,140,.25) 31% 60%,transparent 61%)}
+.map{width:224px;height:64px;border-radius:14px;cursor:pointer}
+.hud-tr{position:absolute;top:calc(14px + env(safe-area-inset-top,0px));right:16px;display:flex;gap:8px;pointer-events:auto}
+.prompt{position:absolute;left:50%;bottom:calc(28px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);display:flex;align-items:center;gap:16px;padding:10px 10px 10px 18px;border-radius:18px;max-width:calc(100vw - 32px);pointer-events:auto;animation:rise .35s cubic-bezier(.2,.8,.2,1)}
+.prompt > div{min-width:0}
+.prompt-name{margin:0;font-weight:700;font-size:16px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.prompt-sub{margin:0;font-size:13px;color:var(--chalk-2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+@keyframes rise{from{opacity:0;transform:translate(-50%,10px)}}
+.hint{position:absolute;left:50%;top:calc(96px + env(safe-area-inset-top,0px));transform:translateX(-50%);padding:10px 18px;border-radius:999px;font-size:14px;color:var(--chalk-2);white-space:nowrap;transition:opacity .8s ease}
+.hint.off{opacity:0}
+.hint b{color:var(--chalk);font-weight:600}
+.joy{position:absolute;left:24px;bottom:calc(28px + env(safe-area-inset-bottom,0px));width:128px;height:128px;border-radius:50%;border:1px solid var(--line);background:rgba(16,16,18,.38);touch-action:none;pointer-events:auto}
+.joy-knob{position:absolute;left:50%;top:50%;width:54px;height:54px;margin:-27px 0 0 -27px;border-radius:50%;background:rgba(242,239,232,.88);box-shadow:0 4px 18px rgba(0,0,0,.4)}
+
+/* sheets */
+.sheet{position:fixed;top:16px;right:16px;bottom:16px;z-index:7;width:min(400px,calc(100vw - 32px));display:flex;flex-direction:column;border-radius:var(--r-panel);box-shadow:0 24px 70px rgba(0,0,0,.5);background:var(--glass-strong);transform:translateX(calc(100% + 32px));visibility:hidden;transition:transform .38s cubic-bezier(.2,.8,.2,1),visibility 0s linear .38s}
+.sheet.open{transform:none;visibility:visible;transition:transform .38s cubic-bezier(.2,.8,.2,1),visibility 0s}
+.sheet-head{position:relative;padding:22px 64px 12px 22px;display:grid;gap:6px}
+.sheet-head h2{margin:0;font:600 30px/1.05 var(--f-display);text-wrap:balance}
+.sheet-head .gu{margin:0;font-size:18px;color:var(--chalk-2)}
+.close{position:absolute;top:14px;right:14px}
+.sheet-body{flex:1;min-height:0;overflow-y:auto;grid-auto-rows:max-content;padding:6px 22px 18px;display:grid;gap:20px;align-content:start}
+.sheet-foot{display:flex;flex-wrap:wrap;gap:10px;padding:14px 22px calc(16px + env(safe-area-inset-bottom,0px));border-top:1px solid var(--line)}
+.sheet-foot .btn{flex:1}
+.facts{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:1px;margin:0;border-radius:14px;overflow:hidden;background:var(--line);border:1px solid var(--line)}
+.facts div{background:var(--night);padding:12px 14px;min-width:0}
+.facts dt{font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--chalk-3)}
+.facts dd{margin:2px 0 0;font-weight:600;font-variant-numeric:tabular-nums}
+.yes{color:#8fdc8a}.no{color:var(--chalk-3)}
+.sec h3{margin:0 0 8px;font-size:13px;letter-spacing:.06em;text-transform:uppercase;color:var(--chalk-3);font-weight:600}
+.tags{display:flex;flex-wrap:wrap;gap:8px;margin:0;padding:0;list-style:none}
+.tags li{padding:5px 12px;border-radius:999px;border:1px solid var(--line);font-size:14px}
+.code-card{display:grid;gap:8px;padding:14px;border-radius:14px;border:1px dashed rgba(217,191,140,.55);background:rgba(217,191,140,.07)}
+.code-row{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.code{font:500 20px/1.2 var(--f-mono);letter-spacing:.04em;color:var(--marigold);user-select:all;overflow-wrap:anywhere}
+.code-card p{margin:0;font-size:14px;color:var(--chalk-2)}
+.demo-note{margin:0;font-size:13px;color:var(--chalk-3)}
+.search{width:100%;min-height:44px;padding:0 14px;border-radius:var(--r-ctl);border:1px solid var(--line);background:rgba(242,239,232,.07);color:var(--chalk);font-size:16px}
+.chips{display:flex;gap:8px;overflow-x:auto;padding-bottom:2px;scrollbar-width:none}
+.chip{flex:none;min-height:34px;padding:0 12px;border-radius:999px;border:1px solid var(--line);background:transparent;cursor:pointer;font-size:13px;font-weight:600;display:inline-flex;align-items:center;gap:6px}
+.chip[aria-pressed="true"]{background:var(--chalk);color:var(--night);border-color:var(--chalk)}
+.dot{width:9px;height:9px;border-radius:50%;background:var(--c);flex:none}
+.dir-list{display:grid;gap:8px;margin:0;padding:0;list-style:none}
+.dir-item{width:100%;display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:4px 12px;padding:12px 14px;border-radius:14px;border:1px solid var(--line);background:rgba(242,239,232,.04);cursor:pointer;text-align:left}
+.dir-item:hover{background:rgba(242,239,232,.1)}
+.dir-name{font-weight:700;font-size:15px;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.dir-meta{grid-column:1;display:flex;align-items:center;gap:6px;font-size:13px;color:var(--chalk-2)}
+.dir-go{grid-column:2;grid-row:1 / span 2;font-size:13px;font-weight:600;color:var(--marigold)}
+.empty{color:var(--chalk-3);font-size:14px}
+
+.toast{position:fixed;left:50%;top:calc(16px + env(safe-area-inset-top,0px));z-index:30;transform:translate(-50%,-140%);max-width:calc(100vw - 32px);padding:10px 18px;border-radius:14px;font-size:14px;transition:transform .35s cubic-bezier(.2,.8,.2,1)}
+.toast.show{transform:translate(-50%,0)}
+.fade{position:fixed;inset:0;z-index:15;background:var(--night);opacity:0;pointer-events:none;transition:opacity .3s ease}
+.fade.on{opacity:1}
+
+/* shop together */
+.narrow{display:none}
+.group-dot{width:9px;height:9px;border-radius:50%;background:#8fdc8a;box-shadow:0 0 0 3px rgba(143,220,138,.25);flex:none}
+.group-dot.wait{background:var(--marigold);box-shadow:0 0 0 3px rgba(217,191,140,.25)}
+.invite-note{margin:0;max-width:46ch;padding:12px 16px;border-radius:14px;border:1px solid rgba(217,191,140,.5);background:rgba(16,16,18,.55);color:var(--chalk);font-size:15px}
+.invite-note b{color:var(--marigold)}
+.react{position:absolute;right:16px;bottom:calc(28px + env(safe-area-inset-bottom,0px));display:flex;align-items:center;gap:10px;pointer-events:auto}
+.react-btn{width:52px;height:52px;border-radius:50%;font-size:24px}
+.react-tray{display:flex;gap:4px;padding:6px;border-radius:999px}
+.react-tray button{min-height:40px;padding:0 12px;border:0;border-radius:999px;background:transparent;cursor:pointer;font-size:14px;font-weight:600;white-space:nowrap}
+.react-tray button:hover,.react-tray button:focus-visible{background:rgba(242,239,232,.14);outline:none}
+.react-tray .emo{font-size:22px;padding:0 8px}
+.react-tray kbd{margin-left:6px}
+.members{display:grid;gap:8px;margin:0;padding:0;list-style:none}
+.member{display:grid;grid-template-columns:auto minmax(0,1fr) auto;align-items:center;gap:12px;padding:10px 12px;border-radius:14px;border:1px solid var(--line);background:rgba(242,239,232,.04)}
+.member-av{width:32px;height:32px;border-radius:50%;background:var(--c);box-shadow:inset 0 0 0 3px var(--c2)}
+.member-name{margin:0;font-weight:700;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.member-sub{margin:0;font-size:13px;color:var(--chalk-2);min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.member-actions{display:flex;gap:6px}
+.member-actions .btn{min-height:36px;padding:0 12px;font-size:13px}
+.member-actions .btn.on{border-color:var(--marigold);color:var(--marigold)}
+.link-box{display:grid;gap:10px;padding:14px;border-radius:14px;border:1px dashed rgba(217,191,140,.55);background:rgba(217,191,140,.07)}
+.link-text{font:500 14px/1.35 var(--f-mono);color:var(--marigold);overflow-wrap:anywhere;user-select:all}
+.link-actions{display:flex;flex-wrap:wrap;gap:8px}
+.link-actions .btn{flex:1}
+.steps{margin:0;padding-left:20px;display:grid;gap:6px;color:var(--chalk-2)}
+.note{margin:0;font-size:13px;color:var(--chalk-3)}
+.note.warn{color:var(--marigold)}
+.btn.star.on{border-color:var(--marigold);color:var(--marigold)}
+.dir-star{color:var(--marigold);margin-left:4px}
+
+/* riding */
+.vignette{position:fixed;inset:0;pointer-events:none;z-index:2;background:radial-gradient(130% 100% at 50% 45%,transparent 55%,rgba(10,8,6,.38) 100%)}
+.ride-btn{position:absolute;right:16px;bottom:calc(92px + env(safe-area-inset-bottom,0px));pointer-events:auto;min-height:48px;padding:0 18px;font-size:15px}
+.ride-hud{position:absolute;left:50%;bottom:calc(24px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);display:flex;align-items:center;gap:10px;padding:10px;border-radius:20px;pointer-events:auto}
+.speed{display:grid;justify-items:center;min-width:78px;padding:0 8px;line-height:1}
+.speed b{font:600 34px/1 var(--f-display);font-variant-numeric:tabular-nums}
+.speed span{font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--chalk-3);margin-top:4px}
+.ride-hud .btn{min-height:44px}
+
+@media (max-width:720px){
+  .ride-btn{bottom:calc(236px + env(safe-area-inset-bottom,0px))}
+  .ride-hud{left:auto;right:16px;transform:none;flex-direction:column;align-items:stretch;bottom:calc(30px + env(safe-area-inset-bottom,0px))}
+  .ride-hud kbd{display:none}
+  .hud-tr .narrow{display:inline}
+  .react{bottom:calc(168px + env(safe-area-inset-bottom,0px));flex-direction:column-reverse;align-items:flex-end}
+  .react-tray{flex-direction:column;align-items:stretch;border-radius:18px}
+  .react-tray kbd{display:none}
+  .creator{top:auto;left:0;right:0;bottom:0;width:auto;height:min(54vh,520px);border-radius:var(--r-panel) var(--r-panel) 0 0}
+  .panel-head{padding:16px 18px 4px}
+  .panel-head h2{font-size:24px}
+  .panel-body{padding:10px 18px 14px;gap:16px}
+  .panel-foot{padding-left:18px;padding-right:18px}
+  .sheet{top:auto;left:0;right:0;bottom:0;width:auto;max-height:80vh;border-radius:var(--r-panel) var(--r-panel) 0 0;transform:translateY(105%)}
+  .prompt{left:auto;right:16px;transform:none;bottom:calc(36px + env(safe-area-inset-bottom,0px));max-width:calc(100vw - 186px);flex-direction:column;align-items:stretch;gap:8px;padding:12px;animation:none}
+  .hud-tr .wide,.brand .wide{display:none}
+  .hud-tr .btn{min-height:40px;padding:0 14px;font-size:14px}
+  .map{width:180px;height:52px}
+  .hint{top:auto;bottom:calc(176px + env(safe-area-inset-bottom,0px));white-space:normal;text-align:center;width:max-content;max-width:calc(100vw - 32px)}
+}
+@media (max-width:440px){
+  .brand{padding:7px}
+  .brand > span:last-child{display:none}
+}
+@media (prefers-reduced-motion:reduce){*{animation-duration:.01ms!important;transition-duration:.01ms!important}}
+</style>
+</head>
+<body>
+<canvas id="scene" tabindex="0" aria-label="3D view of Gurukul Street. Use arrow keys or W A S D to walk."></canvas>
+<div class="vignette" aria-hidden="true"></div>
+<div class="scrim" id="scrim"></div>
+<div class="fade" id="fade"></div>
+<div class="loader" id="loader"><div class="loader-mark" aria-hidden="true"></div><p id="loaderText">Setting up Gurukul Road…</p></div>
+
+<section class="intro" id="intro" hidden>
+  <p class="eyebrow">Faro Ahmedabad · Project 01</p>
+  <h1>Gurukul <span>Street</span></h1>
+  <p class="gu" lang="gu">ગુરુકુળ રોડ, મેમનગર</p>
+  <p class="lede">Walk or ride down Memnagar's clothing street from your screen. Make your avatar, take a scooter, and step inside the boutiques that catch your eye.</p>
+  <p class="invite-note" id="inviteNote" hidden><b>You're invited to shop together.</b> Make your avatar and you'll join your friend on the street.</p>
+  <div class="row">
+    <button class="btn primary" id="startBtn">Make your avatar</button>
+    <span class="meta">12 sample boutiques · walk or ride</span>
+  </div>
+</section>
+
+<aside class="creator glass" id="creator" hidden aria-label="Avatar maker">
+  <header class="panel-head">
+    <p class="eyebrow">Your avatar</p>
+    <h2>Dress for Gurukul</h2>
+  </header>
+  <div class="panel-body">
+    <label class="field" for="nameInput">Name on your tag
+      <input id="nameInput" maxlength="16" placeholder="Your name" autocomplete="off">
+    </label>
+    <div class="group"><div class="group-label">Outfit <output id="outfitOut"></output></div><div class="opts" id="optOutfit"></div></div>
+    <div class="group"><div class="group-label">Colour <output id="primaryOut"></output></div><div class="swatches" id="optPrimary"></div></div>
+    <div class="group"><div class="group-label">Border and work <output id="accentOut"></output></div><div class="swatches" id="optAccent"></div></div>
+    <div class="group"><div class="group-label">Skin tone</div><div class="swatches" id="optSkin"></div></div>
+    <div class="group"><div class="group-label">Hair <output id="hairOut"></output></div><div class="opts three" id="optHair"></div></div>
+  </div>
+  <footer class="panel-foot">
+    <button class="btn" id="shuffleBtn">Shuffle</button>
+    <button class="btn primary" id="enterBtn">Step onto the street</button>
+  </footer>
+</aside>
+
+<div class="hud" id="hud" hidden>
+  <div class="hud-tl">
+    <div class="brand glass"><span class="brand-mark" aria-hidden="true"></span><span><b>Faro</b><span class="wide"> · Gurukul Street</span></span></div>
+    <canvas class="map glass" id="map" aria-label="Street map. Click a shop to go there."></canvas>
+  </div>
+  <div class="hud-tr">
+    <button class="btn glass" id="shopsBtn"><span class="wide">Find a shop</span><span class="narrow">Shops</span> <kbd class="wide">F</kbd></button>
+    <button class="btn glass" id="groupBtn"><span class="group-dot" id="groupDot" hidden></span><span class="wide">Shop together</span><span class="narrow">Together</span> <kbd class="wide">G</kbd></button>
+    <button class="btn glass" id="avatarBtn" title="Change your avatar">Avatar</button>
+  </div>
+  <button class="btn glass ride-btn" id="rideBtn" title="Ride a scooter or motorbike">Ride <kbd class="wide">R</kbd></button>
+  <div class="ride-hud glass" id="rideHud" hidden>
+    <div class="speed" aria-live="off"><b id="rideSpeed">0</b><span>km/h</span></div>
+    <button class="btn" id="hornBtn">Horn <kbd>H</kbd></button>
+    <button class="btn" id="muteBtn" aria-pressed="true">Sound on</button>
+    <button class="btn primary" id="offBtn">Get off <kbd>R</kbd></button>
+  </div>
+  <div class="react" id="react" hidden>
+    <div class="react-tray glass" id="reactTray" hidden></div>
+    <button class="btn glass icon react-btn" id="reactBtn" aria-label="Send a reaction to your group" aria-expanded="false">😊</button>
+  </div>
+  <div class="hint glass" id="hint"></div>
+  <div class="prompt glass" id="prompt" hidden>
+    <div><p class="prompt-name" id="promptName"></p><p class="prompt-sub" id="promptSub"></p></div>
+    <button class="btn primary sm" id="promptBtn">View shop <kbd class="wide">E</kbd></button>
+  </div>
+  <div class="joy" id="joy" hidden><div class="joy-knob" id="joyKnob"></div></div>
+</div>
+
+<aside class="sheet glass" id="shopSheet" aria-label="Shop details"></aside>
+
+<aside class="sheet glass" id="groupSheet" aria-label="Shop together"></aside>
+
+<aside class="sheet glass" id="rideSheet" aria-label="Take a ride"></aside>
+
+<aside class="sheet glass" id="dirSheet" aria-label="Find a shop">
+  <header class="sheet-head">
+    <p class="eyebrow">Gurukul Street</p>
+    <h2>Find a shop</h2>
+    <button class="btn icon close" id="dirClose" aria-label="Close">✕</button>
+  </header>
+  <div class="sheet-body">
+    <input class="search" id="dirSearch" type="search" placeholder="Search by name or what you need" autocomplete="off" aria-label="Search shops">
+    <div class="chips" id="dirChips"></div>
+    <ul class="dir-list" id="dirList"></ul>
+  </div>
+</aside>
+
+<div class="toast glass" id="toast" role="status" aria-live="polite"></div>
+
+<script type="importmap">
+{ "imports": {
+  "three": "https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js",
+  "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/"
+} }
+</script>
+<script type="module">

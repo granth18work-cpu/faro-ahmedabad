@@ -8,25 +8,38 @@ Walkable 3D versions of Ahmedabad's famous market streets. Visitors make an avat
 
 | # | Street | Status |
 |---|---|---|
-| 01 | Gurukul Street, Memnagar | Prototype with 12 sample shops. Shop names and details are placeholders. |
+| 01 | Gurukul Street, Memnagar | Realistic 3D street you can walk or ride, 12 sample boutiques (placeholders) and everyday businesses, shop-together with friends |
 
 ## What's in this repository
 
 | Path | What it is |
 |---|---|
+| `src/` | The source, split into parts: page and styles, engine and shop data, world, avatars, vehicles, app, shop-together, boot |
+| `build.py` | Joins the parts in `src/` into `site/index.html` |
 | `site/` | The website. Everything in this folder is published. |
-| `site/index.html` | Gurukul Street. One file holds the full source; three.js and fonts load from CDNs. |
+| `site/index.html` | The built page (do not edit by hand; edit `src/` and rebuild) |
+| `site/assets/` | Photo textures and sky lighting from Poly Haven (CC0), see `site/assets/CREDITS.md` |
 | `site/og-image.jpg` | The preview image shown when the link is shared |
 | `01 Gurukul Street/` | Project notes: what the prototype includes, controls, next steps |
 | `.github/workflows/deploy.yml` | Publishes `site/` to GitHub Pages on every push to `main` |
 
+## Change something
+
+Edit the files in `src/`, then rebuild:
+
+```bash
+python3 build.py
+```
+
 ## Run it locally
 
-Open `site/index.html` in Chrome, Safari or Firefox (it needs an internet connection), or serve the folder:
+The textures load from files, so serve the folder rather than double-clicking it:
 
 ```bash
 python3 -m http.server 8000 --directory site
 ```
+
+Add `?debug` to the address to expose `window.faroDebug` (render timing and a ride simulator).
 
 ## Publish a change
 

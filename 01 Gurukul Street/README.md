@@ -5,10 +5,18 @@ Project 01 of Faro Ahmedabad · Gurukul Road, Memnagar
 ## The prototype
 
 - **Live:** https://faro-ahmedabad.thedrytextco.online
-- **File:** `site/index.html` at the top of this repository. This one file is the complete source code. Double-click it to open it in Chrome, Safari or Firefox; it needs an internet connection, because it loads the 3D engine (three.js) and the fonts online.
+- **Source:** `src/` at the top of this repository, built into `site/index.html` with `python3 build.py`. Textures and sky lighting live in `site/assets/`.
 - **Version:** 1, built 1 October 2026, live on its own subdomain since 12 October 2026.
 
 ## What's in it
+
+**Realistic version (24 October 2026):** late-afternoon light with a physical sky and real-world sky lighting, photo-scanned textures (asphalt, plaster, interlocking pavers, concrete, rolling shutters, tiles, wood, bark) from Poly Haven, soft contact shadows on desktop, muted colours throughout. The street is now about 250 m long with 32 buildings: the 12 boutiques sit in the middle, surrounded by everyday businesses (pharmacy, sweets, mobile shop, xerox, dairy, hardware, a TO LET shutter), homes and offices above, electric poles with tangled cables, neem trees and parked two-wheelers and cars.
+
+- **Ride a scooter or motorbike:** press R (or tap Ride) to bring one to you, or walk to the Faro Rides stand inside the arch. Throttle, brakes, speed-dependent steering, leaning into turns, engine sound and horn. Park it anywhere and walk off.
+- **Traffic:** scooters, motorbikes, auto-rickshaws and cars drive on the left, loop round both roundabouts, stop for people in the way and honk if you block them.
+- **Avatars:** adult proportions, everyday outfits (shirt and jeans, kurti with palazzo) alongside kurta, saree, chaniya choli and sherwani, in muted colours.
+
+**From earlier versions** (the dusk look, festival lights and lighthouse beam were replaced by the realistic version):
 
 - **Opening screen:** the camera drifts down the street at dusk, through an entrance arch that says "પધારો" (welcome). Leaving the street, the back of the arch says "આવજો".
 - **Avatar maker:** name tag, outfit (kurta, chaniya choli, saree, sherwani), colour, border work, skin tone and hair (including a safo). Avatars are built from smooth, rounded shapes with fabric patterns such as bandhani dots, mirror work and zari borders.
@@ -29,6 +37,9 @@ Project 01 of Faro Ahmedabad · Gurukul Road, Memnagar
 | Open a shop | E when you're in front of it | Tap "View shop" |
 | Find a shop | F | "Find a shop" button |
 | Shop together | G | "Together" button |
+| Ride / get off | R | "Ride" button / "Get off" |
+| Throttle, brake, steer (riding) | W, S, A and D | Joystick up, down, sideways |
+| Horn (riding) | H | "Horn" button |
 | Send a reaction (in a group) | Keys 1 to 5, or the 😊 button | 😊 button |
 
 ## Sample data
