@@ -6,7 +6,7 @@ const VM = {
   rubber: new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.93 }),
   chrome: new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.2, metalness: 0.95 }),
   glass: new THREE.MeshStandardMaterial({ color: '#1e2429', roughness: 0.04, metalness: 0.3, transparent: true, opacity: 0.62, envMapIntensity: 1.6 }),
-  light: new THREE.MeshBasicMaterial({ vertexColors: true, toneMapped: false }),
+  light: new THREE.MeshBasicMaterial({ vertexColors: true }),
 };
 const paintCache = new Map();
 const paintMat = (hex, shared = true) => {
@@ -38,6 +38,7 @@ const boxG = (x, y, z) => vcache(`b${x}_${y}_${z}`, () => new THREE.BoxGeometry(
 const cylG = (a, b, h, s = 16) => vcache(`c${a}_${b}_${h}_${s}`, () => new THREE.CylinderGeometry(a, b, h, s));
 const torusG = (R, r, arc = Math.PI * 2) => vcache(`t${R}_${r}_${arc}`, () => new THREE.TorusGeometry(R, r, 10, 30, arc));
 const sphereG = (r, w = 14, h = 10) => vcache(`s${r}_${w}`, () => new THREE.SphereGeometry(r, w, h));
+const capsuleG = (r, l) => vcache(`cap${r}_${l}`, () => new THREE.CapsuleGeometry(r, l, 8, 18));
 
 function wheel(S, part, z, R, spoked) {
   const tireR = R - 0.07;
@@ -51,33 +52,57 @@ function wheel(S, part, z, R, spoked) {
     for (let i = 0; i < 5; i++) { const a = (i / 5) * Math.PI * 2; S.P(part, 'dark', boxG(0.1, 0.03, tireR - 0.09), '#3a3b3d', [0, R + Math.cos(a) * 0.06, z + Math.sin(a) * 0.06], [a + Math.PI / 2, 0, 0]); }
   }
 }
+/* side-profile bodies: a 2D silhouette (z forward, y up) extruded to the vehicle's width with rounded edges */
+function profileGeo(key, pts, width, bevel = 0.04) {
+  return vcache(`prof_${key}_${width}_${bevel}`, () => {
+    const sh = new THREE.Shape();
+    pts.forEach((p, i) => {
+      if (i === 0) sh.moveTo(p[0], p[1]);
+      else if (p.length === 4) sh.quadraticCurveTo(p[2], p[3], p[0], p[1]);
+      else sh.lineTo(p[0], p[1]);
+    });
+    sh.closePath();
+    const g = new THREE.ExtrudeGeometry(sh, { depth: Math.max(0.001, width - bevel * 2), bevelEnabled: true, bevelThickness: bevel, bevelSize: bevel, bevelSegments: 4, curveSegments: 14, steps: 1 });
+    g.translate(0, 0, -(width - bevel * 2) / 2);
+    g.rotateY(-Math.PI / 2);
+    g.computeVertexNormals();
+    return g;
+  });
+}
 function specScooter() {
   const S = newSpec('scooter'), R = 0.27, P = S.P;
   wheel(S, 'wheelR', -0.62, R, false); wheel(S, 'wheelF', 0.6, R, false);
-  P('body', 'paint', rbox(0.44, 0.4, 0.92, 4, 0.17), '#ffffff', [0, 0.6, -0.34]);
-  P('body', 'paint', rbox(0.3, 0.14, 0.38, 3, 0.06), '#ffffff', [0, 0.45, -0.66], [0.3, 0, 0]);
-  P('body', 'dark', rbox(0.36, 0.07, 0.5, 2, 0.03), '#232323', [0, 0.33, 0.15]);
-  P('body', 'paint', rbox(0.5, 0.8, 0.12, 4, 0.055), '#ffffff', [0, 0.72, 0.47], [-0.22, 0, 0]);
-  P('body', 'dark', rbox(0.44, 0.68, 0.05, 3, 0.02), '#2a2a2b', [0, 0.69, 0.4], [-0.22, 0, 0]);
-  P('body', 'dark', rbox(0.33, 0.1, 0.64, 3, 0.05), '#1b1a1a', [0, 0.84, -0.3]);
-  P('body', 'dark', rbox(0.2, 0.04, 0.12, 2, 0.015), '#1b1a1a', [0, 0.81, -0.67]);
-  P('body', 'light', rbox(0.22, 0.06, 0.04, 2, 0.015), '#a8251d', [0, 0.66, -0.8]);
-  P('body', 'dark', boxG(0.18, 0.11, 0.01), '#e6e3da', [0, 0.52, -0.84], [0.3, 0, 0]);
-  P('body', 'chrome', cylG(0.042, 0.05, 0.42, 12), '#7d8083', [0.17, 0.3, -0.56], [Math.PI / 2, 0, 0]);
-  P('body', 'light', sphereG(0.05), '#ece6d6', [0, 0.92, 0.53], [0, 0, 0], [1.2, 0.6, 0.45]);
+  /* rear body: an egg-shaped shell, wider at the hips, tapering to the tail */
+  P('body', 'paint', sphereG(0.5, 32, 22), '#ffffff', [0, 0.6, -0.4], [0.06, 0, 0], [0.42, 0.42, 1.0]);
+  P('body', 'paint', sphereG(0.5, 24, 16), '#ffffff', [0, 0.52, -0.08], [0, 0, 0], [0.36, 0.3, 0.42]);
+  P('body', 'dark', profileGeo('scooterFloor', [[0.0, 0.29], [0.4, 0.29], [0.43, 0.35], [-0.02, 0.37]], 0.36, 0.02), '#262626', [0, 0, 0]);
+  /* leg shield: a curved shell that narrows into the steering column */
+  P('body', 'paint', sphereG(0.5, 30, 20), '#ffffff', [0, 0.6, 0.48], [-0.24, 0, 0], [0.5, 0.74, 0.2]);
+  P('body', 'paint', cylG(0.09, 0.15, 0.36, 22), '#ffffff', [0, 0.92, 0.5], [-0.3, 0, 0], [1, 1, 0.7]);
+  P('body', 'dark', sphereG(0.5, 26, 18), '#2a2a2b', [0, 0.6, 0.44], [-0.24, 0, 0], [0.46, 0.7, 0.16]);
+  P('body', 'light', sphereG(0.05), '#ece6d6', [0, 0.84, 0.6], [0, 0, 0], [1.3, 0.5, 0.35]);
+  /* seat, grab rail, tail lamp, plate, exhaust */
+  P('body', 'dark', profileGeo('scooterSeat', [[-0.66, 0.8], [-0.1, 0.8], [-0.04, 0.85, -0.04, 0.82], [-0.12, 0.92, -0.04, 0.91], [-0.6, 0.92], [-0.72, 0.86, -0.72, 0.92]], 0.32, 0.045), '#1c1b1b', [0, 0, 0]);
+  P('body', 'dark', profileGeo('scooterGrab', [[-0.86, 0.82], [-0.7, 0.82], [-0.7, 0.86], [-0.88, 0.86]], 0.3, 0.015), '#1c1b1b', [0, 0, 0]);
+  P('body', 'light', sphereG(0.06), '#a8251d', [0, 0.66, -0.88], [0, 0, 0], [1.6, 0.6, 0.4]);
+  P('body', 'dark', boxG(0.17, 0.1, 0.01), '#e6e3da', [0, 0.5, -0.86], [0.35, 0, 0]);
+  P('body', 'chrome', cylG(0.04, 0.048, 0.4, 14), '#7d8083', [0.17, 0.3, -0.56], [Math.PI / 2, 0, 0]);
   P('body', 'chrome', cylG(0.01, 0.01, 0.3, 6), '#777', [0.15, 0.2, -0.05], [0.9, 0, 0]);
-  P('front', 'paint', rbox(0.6, 0.16, 0.24, 3, 0.07), '#ffffff', [0, 1.06, 0.47]);
-  P('front', 'light', sphereG(0.07), '#f2efe6', [0, 1.06, 0.6], [0, 0, 0], [1.25, 0.75, 0.5]);
-  P('front', 'dark', cylG(0.018, 0.018, 0.74, 8), '#1d1d1d', [0, 1.07, 0.43], [0, 0, Math.PI / 2]);
+  /* steering: compact rounded handlebar housing with the headlamp, fork and mudguard */
+  P('front', 'paint', capsuleG(0.07, 0.36), '#ffffff', [0, 1.07, 0.47], [0, 0, Math.PI / 2], [1, 1, 1.25]);
+  P('front', 'paint', sphereG(0.1, 20, 14), '#ffffff', [0, 1.06, 0.53], [0, 0, 0], [1.2, 0.8, 0.9]);
+  P('front', 'light', sphereG(0.06), '#f2efe6', [0, 1.07, 0.62], [0, 0, 0], [1.3, 0.75, 0.45]);
+  P('front', 'dark', cylG(0.017, 0.017, 0.74, 8), '#1d1d1d', [0, 1.07, 0.43], [0, 0, Math.PI / 2]);
   for (const s of [-1, 1]) {
-    P('front', 'dark', cylG(0.022, 0.022, 0.12, 8), '#101010', [s * 0.33, 1.07, 0.43], [0, 0, Math.PI / 2]);
-    P('front', 'chrome', cylG(0.007, 0.007, 0.24, 6), '#777', [s * 0.24, 1.19, 0.43], [0, 0, s * 0.35]);
-    P('front', 'chrome', sphereG(0.045), '#c9cdd0', [s * 0.29, 1.3, 0.43], [0, 0, 0], [1.4, 0.9, 0.35]);
+    P('front', 'dark', cylG(0.021, 0.021, 0.12, 10), '#101010', [s * 0.33, 1.07, 0.43], [0, 0, Math.PI / 2]);
+    P('front', 'chrome', cylG(0.007, 0.007, 0.24, 6), '#777', [s * 0.22, 1.18, 0.43], [0, 0, s * 0.35]);
+    P('front', 'chrome', sphereG(0.042), '#c9cdd0', [s * 0.27, 1.29, 0.43], [0, 0, 0], [1.4, 0.9, 0.35]);
+    P('front', 'light', sphereG(0.022), '#d99a3a', [s * 0.2, 1.06, 0.55], [0, 0, 0], [1.4, 0.8, 0.6]);
   }
-  P('front', 'chrome', cylG(0.025, 0.025, 0.55, 8), '#9a9c9e', [0, 0.66, 0.58], [-0.25, 0, 0]);
-  P('front', 'paint', rbox(0.16, 0.08, 0.44, 3, 0.035), '#ffffff', [0, 0.55, 0.62], [-0.15, 0, 0]);
+  P('front', 'chrome', cylG(0.024, 0.024, 0.55, 10), '#9a9c9e', [0, 0.66, 0.6], [-0.25, 0, 0]);
+  P('front', 'paint', profileGeo('scooterFender', [[0.38, 0.46], [0.82, 0.46, 0.6, 0.62], [0.84, 0.5], [0.6, 0.66, 0.84, 0.62], [0.36, 0.5, 0.42, 0.6]], 0.15, 0.025), '#ffffff', [0, 0, 0]);
   S.pivots = { front: new THREE.Vector3(0, 0.6, 0.55), wheelF: new THREE.Vector3(0, R, 0.6), wheelR: new THREE.Vector3(0, R, -0.62) };
-  Object.assign(S, { seat: { y: 0.89, z: -0.2 }, R, half: 0.36, len: 0.95, maxV: 12.5, acc: 3.6 });
+  Object.assign(S, { seat: { y: 0.92, z: -0.32 }, R, half: 0.36, len: 0.95, maxV: 12.5, acc: 3.6 });
   return S;
 }
 function specBike() {
@@ -86,13 +111,14 @@ function specBike() {
   st('body', 'dark', '#1b1b1c', [0, 0.97, 0.5], [0, 0.48, 0.12], 0.03);
   st('body', 'dark', '#1b1b1c', [0, 0.95, 0.42], [0, 0.82, -0.32], 0.026);
   st('body', 'dark', '#1b1b1c', [0, 0.48, 0.12], [0, 0.42, -0.18], 0.03);
-  P('body', 'paint', rbox(0.34, 0.24, 0.52, 4, 0.11), '#ffffff', [0, 0.96, 0.18], [-0.12, 0, 0]);
-  P('body', 'chrome', cylG(0.045, 0.045, 0.02, 14), '#b8bbbe', [0, 1.085, 0.2], [-0.12, 0, 0]);
-  P('body', 'paint', rbox(0.3, 0.2, 0.3, 3, 0.08), '#ffffff', [0, 0.72, -0.22]);
-  P('body', 'dark', rbox(0.28, 0.09, 0.72, 3, 0.045), '#1a1919', [0, 0.87, -0.33], [0.04, 0, 0]);
-  P('body', 'paint', rbox(0.17, 0.05, 0.44, 3, 0.02), '#ffffff', [0, 0.8, -0.74], [0.25, 0, 0]);
-  P('body', 'light', rbox(0.14, 0.06, 0.05, 2, 0.015), '#a3231b', [0, 0.82, -0.93]);
-  P('body', 'dark', boxG(0.17, 0.1, 0.01), '#e6e3da', [0, 0.68, -0.98], [0.25, 0, 0]);
+  /* fuel tank with knee recesses, side panel and tail */
+  P('body', 'paint', profileGeo('bikeTank', [[-0.06, 0.84], [0.42, 0.88], [0.5, 0.98, 0.5, 0.9], [0.3, 1.1, 0.46, 1.08], [0.02, 1.06, 0.12, 1.12], [-0.1, 0.92, -0.08, 1.0]], 0.34, 0.09), '#ffffff', [0, 0, 0]);
+  P('body', 'chrome', cylG(0.045, 0.045, 0.02, 14), '#b8bbbe', [0, 1.105, 0.2], [-0.12, 0, 0]);
+  P('body', 'paint', profileGeo('bikeSide', [[-0.42, 0.6], [-0.08, 0.6], [-0.06, 0.84], [-0.44, 0.84, -0.3, 0.86]], 0.3, 0.06), '#ffffff', [0, 0, 0]);
+  P('body', 'dark', profileGeo('bikeSeat', [[-0.7, 0.82], [-0.06, 0.84], [0.0, 0.88, 0.0, 0.85], [-0.12, 0.93, -0.02, 0.93], [-0.66, 0.92], [-0.76, 0.86, -0.76, 0.92]], 0.28, 0.035), '#1a1919', [0, 0, 0]);
+  P('body', 'paint', profileGeo('bikeTail', [[-0.6, 0.74], [-1.0, 0.82, -0.86, 0.72], [-0.98, 0.86], [-0.62, 0.82, -0.82, 0.86]], 0.17, 0.02), '#ffffff', [0, 0, 0]);
+  P('body', 'light', rbox(0.14, 0.06, 0.05, 2, 0.015), '#a3231b', [0, 0.84, -0.96]);
+  P('body', 'dark', boxG(0.17, 0.1, 0.01), '#e6e3da', [0, 0.7, -1.0], [0.25, 0, 0]);
   P('body', 'chrome', rbox(0.28, 0.3, 0.38, 3, 0.05), '#55585b', [0, 0.42, 0.06]);
   for (let i = 0; i < 4; i++) P('body', 'chrome', boxG(0.3, 0.012, 0.16), '#6b6e71', [0, 0.6 + i * 0.03, 0.15], [-0.3, 0, 0]);
   st('body', 'chrome', '#9fa2a5', [0.12, 0.33, 0.18], [0.2, 0.34, -0.5], 0.028);
@@ -105,8 +131,8 @@ function specBike() {
   P('body', 'dark', rbox(0.06, 0.12, 0.5, 2, 0.02), '#202020', [-0.13, 0.36, -0.36]);
   st('front', 'chrome', '#b0b3b6', [0.09, R, 0.7], [0.09, 1.0, 0.5], 0.024);
   st('front', 'chrome', '#b0b3b6', [-0.09, R, 0.7], [-0.09, 1.0, 0.5], 0.024);
-  P('front', 'dark', cylG(0.11, 0.1, 0.13, 18), '#1c1c1c', [0, 0.98, 0.62], [Math.PI / 2, 0, 0]);
-  P('front', 'light', cylG(0.094, 0.094, 0.012, 18), '#f1ede2', [0, 0.98, 0.69], [Math.PI / 2, 0, 0]);
+  P('front', 'dark', cylG(0.11, 0.1, 0.13, 20), '#1c1c1c', [0, 0.98, 0.62], [Math.PI / 2, 0, 0]);
+  P('front', 'light', cylG(0.094, 0.094, 0.012, 20), '#f1ede2', [0, 0.98, 0.69], [Math.PI / 2, 0, 0]);
   st('front', 'dark', '#161616', [-0.37, 1.11, 0.45], [0.37, 1.11, 0.45], 0.014);
   for (const s of [-1, 1]) {
     P('front', 'dark', cylG(0.02, 0.02, 0.12, 8), '#0f0f0f', [s * 0.36, 1.11, 0.45], [0, 0, Math.PI / 2]);
@@ -114,50 +140,54 @@ function specBike() {
     P('front', 'chrome', sphereG(0.042), '#c9cdd0', [s * 0.31, 1.34, 0.44], [0, 0, 0], [1.3, 1.0, 0.35]);
   }
   P('front', 'dark', cylG(0.06, 0.06, 0.05, 14), '#151515', [0, 1.1, 0.55], [0.6, 0, 0]);
-  P('front', 'paint', rbox(0.13, 0.05, 0.42, 3, 0.02), '#ffffff', [0, R + 0.27, 0.72], [-0.1, 0, 0]);
+  P('front', 'paint', profileGeo('bikeFender', [[0.46, 0.6], [0.96, 0.52, 0.74, 0.7], [0.98, 0.56], [0.74, 0.74, 0.98, 0.72], [0.44, 0.64, 0.5, 0.7]], 0.12, 0.02), '#ffffff', [0, 0, 0]);
   S.pivots = { front: new THREE.Vector3(0, 0.95, 0.5), wheelF: new THREE.Vector3(0, R, 0.7), wheelR: new THREE.Vector3(0, R, -0.66) };
-  Object.assign(S, { seat: { y: 0.92, z: -0.24 }, R, half: 0.38, len: 1.0, maxV: 16, acc: 4.4 });
+  Object.assign(S, { seat: { y: 0.92, z: -0.3 }, R, half: 0.38, len: 1.0, maxV: 16, acc: 4.4 });
   return S;
 }
 function specCar() {
   const S = newSpec('car'), P = S.P;
-  P('body', 'paint', rbox(1.68, 0.62, 3.75, 5, 0.22), '#ffffff', [0, 0.62, 0]);
-  P('body', 'glass', rbox(1.5, 0.52, 2.0, 4, 0.2), '#ffffff', [0, 1.1, -0.22]);
-  P('body', 'paint', rbox(1.48, 0.1, 1.8, 4, 0.05), '#ffffff', [0, 1.37, -0.28]);
-  for (const z of [1.86, -1.86]) P('body', 'dark', rbox(1.72, 0.22, 0.2, 3, 0.06), '#202022', [0, 0.42, z]);
-  P('body', 'dark', boxG(0.9, 0.12, 0.02), '#18181a', [0, 0.68, 1.885]);
+  /* hatchback silhouette with wheel arches cut into the sill */
+  const arch = (zc) => [[zc - 0.42, 0.3], [zc, 0.7, zc - 0.42, 0.7], [zc + 0.42, 0.3, zc + 0.42, 0.7]];
+  P('body', 'paint', profileGeo('carBody', [[-1.9, 0.28], ...arch(-1.22), [0.8, 0.28], ...arch(1.22), [1.9, 0.28], [1.95, 0.55, 1.97, 0.36], [1.75, 0.86, 1.95, 0.8], [0.75, 1.0], [-1.6, 1.02], [-1.92, 0.9, -1.88, 1.0], [-1.95, 0.4, -1.98, 0.6]], 1.7, 0.1), '#ffffff', [0, 0, 0]);
+  P('body', 'glass', profileGeo('carGlass', [[0.72, 0.98], [-1.55, 1.0], [-1.66, 1.12], [-1.45, 1.38, -1.6, 1.36], [0.05, 1.42], [0.72, 0.98, 0.5, 1.3]], 1.5, 0.06), '#ffffff', [0, 0, 0]);
+  P('body', 'paint', profileGeo('carRoof', [[-1.4, 1.38], [0.05, 1.42], [0.12, 1.44], [-1.42, 1.44]], 1.42, 0.03), '#ffffff', [0, 0.01, 0]);
+  for (const z of [1.9, -1.9]) P('body', 'dark', rbox(1.74, 0.2, 0.18, 3, 0.06), '#1f1f21', [0, 0.38, z * 0.995]);
+  P('body', 'dark', boxG(0.9, 0.14, 0.03), '#18181a', [0, 0.64, 1.93]);
   for (const s of [-1, 1]) {
-    P('body', 'light', rbox(0.32, 0.1, 0.05, 2, 0.02), '#e7e3d8', [s * 0.58, 0.76, 1.85]);
-    P('body', 'light', rbox(0.26, 0.12, 0.05, 2, 0.02), '#7a1a18', [s * 0.62, 0.84, -1.86]);
-    P('body', 'dark', rbox(0.1, 0.07, 0.16, 2, 0.02), '#1d1d1f', [s * 0.88, 1.0, 0.55]);
+    P('body', 'light', rbox(0.34, 0.11, 0.06, 2, 0.02), '#e7e3d8', [s * 0.58, 0.74, 1.88], [0, s * 0.15, 0]);
+    P('body', 'light', rbox(0.28, 0.13, 0.06, 2, 0.02), '#7a1a18', [s * 0.62, 0.86, -1.9]);
+    P('body', 'dark', rbox(0.1, 0.07, 0.16, 2, 0.02), '#1d1d1f', [s * 0.9, 1.0, 0.58]);
+    P('body', 'dark', boxG(0.012, 0.02, 0.22), '#2a2a2c', [s * 0.86, 0.78, -0.2]);
     for (const z of [1.22, -1.22]) {
-      P('body', 'rubber', torusG(0.22, 0.09), '#171717', [s * 0.76, 0.31, z], [0, Math.PI / 2, 0]);
-      P('body', 'chrome', cylG(0.16, 0.16, 0.13, 18), '#8b8e91', [s * 0.77, 0.31, z], [0, 0, Math.PI / 2]);
+      P('body', 'rubber', torusG(0.22, 0.09), '#171717', [s * 0.74, 0.31, z], [0, Math.PI / 2, 0]);
+      P('body', 'chrome', cylG(0.16, 0.16, 0.14, 22), '#8b8e91', [s * 0.75, 0.31, z], [0, 0, Math.PI / 2]);
+      P('body', 'dark', cylG(0.06, 0.06, 0.15, 10), '#3a3b3d', [s * 0.76, 0.31, z], [0, 0, Math.PI / 2]);
     }
   }
-  for (const z of [1.9, -1.9]) P('body', 'dark', boxG(0.5, 0.12, 0.02), '#e6e3da', [0, 0.42, z]);
+  for (const z of [1.94, -1.94]) P('body', 'dark', boxG(0.5, 0.12, 0.02), '#e6e3da', [0, 0.42, z]);
   S.pivots = null; Object.assign(S, { half: 0.9, len: 1.95 });
   return S;
 }
 function specAuto() {
   const S = newSpec('auto'), P = S.P;
-  P('body', 'paint', rbox(1.36, 0.7, 2.3, 4, 0.16), '#ffffff', [0, 0.66, -0.15]);
-  P('body', 'paint', rbox(0.8, 0.95, 0.7, 4, 0.2), '#ffffff', [0, 0.95, 1.1]);
-  P('body', 'dark', rbox(1.48, 0.14, 2.05, 3, 0.06), '#b99634', [0, 2.0, -0.2]);
-  P('body', 'dark', rbox(1.48, 0.9, 0.1, 2, 0.04), '#b99634', [0, 1.55, -1.2]);
-  P('body', 'glass', boxG(1.2, 0.7, 0.05), '#ffffff', [0, 1.6, 0.82], [-0.15, 0, 0]);
-  for (const px of [-0.68, 0.68]) P('body', 'dark', cylG(0.035, 0.035, 1.0, 6), '#1c1b20', [px, 1.5, 0.8]);
-  P('body', 'dark', boxG(1.2, 0.22, 0.6), '#26242a', [0, 1.1, -0.6]);
-  P('body', 'dark', boxG(1.2, 0.55, 0.12), '#26242a', [0, 1.35, -0.92]);
-  for (const [px, pz] of [[-0.66, -0.75], [0.66, -0.75], [0, 1.35]]) {
-    P('body', 'rubber', torusG(0.22, 0.08), '#18171b', [px, 0.3, pz], [0, Math.PI / 2, 0]);
-    P('body', 'chrome', cylG(0.13, 0.13, 0.12, 14), '#8f8b96', [px, 0.3, pz], [0, 0, Math.PI / 2]);
+  P('body', 'paint', profileGeo('autoBody', [[-1.2, 0.32], [0.6, 0.32], [1.0, 0.6, 0.95, 0.34], [1.35, 0.7, 1.3, 0.6], [1.4, 1.3, 1.45, 0.9], [1.15, 1.32], [0.85, 0.95, 0.95, 1.0], [-0.9, 0.95], [-1.25, 0.8, -1.2, 0.95]], 1.34, 0.08), '#ffffff', [0, 0, 0]);
+  P('body', 'dark', profileGeo('autoCanopy', [[-1.3, 1.0], [-1.3, 1.95, -1.4, 1.5], [0.9, 2.05, -0.3, 2.12], [1.18, 1.85, 1.15, 2.02], [1.0, 1.84], [0.8, 1.94, 0.95, 1.95], [-1.1, 1.88, -0.2, 2.0], [-1.18, 1.0, -1.25, 1.4]], 1.46, 0.05), '#b99634', [0, 0, 0]);
+  P('body', 'glass', boxG(1.2, 0.62, 0.04), '#ffffff', [0, 1.55, 1.12], [-0.12, 0, 0]);
+  for (const px of [-0.68, 0.68]) P('body', 'dark', cylG(0.03, 0.03, 0.9, 6), '#1c1b20', [px, 1.42, 1.08]);
+  P('body', 'dark', boxG(1.2, 0.2, 0.6), '#2a272c', [0, 1.05, -0.55]);
+  P('body', 'dark', boxG(1.2, 0.55, 0.1), '#2a272c', [0, 1.32, -0.88]);
+  for (const [px, pz] of [[-0.66, -0.75], [0.66, -0.75], [0, 1.25]]) {
+    P('body', 'rubber', torusG(0.21, 0.08), '#18171b', [px, 0.29, pz], [0, Math.PI / 2, 0]);
+    P('body', 'chrome', cylG(0.13, 0.13, 0.12, 14), '#8f8b96', [px, 0.29, pz], [0, 0, Math.PI / 2]);
   }
-  P('body', 'light', sphereG(0.08), '#efe8d4', [0, 1.25, 1.46]);
-  P('body', 'dark', boxG(0.9, 0.05, 0.05), '#1c1b20', [0, 1.42, 1.32]);
+  P('body', 'light', sphereG(0.08), '#efe8d4', [0, 1.1, 1.44], [0, 0, 0], [1, 1, 0.6]);
+  P('body', 'dark', boxG(0.9, 0.05, 0.05), '#1c1b20', [0, 1.36, 1.0]);
+  P('body', 'dark', boxG(0.4, 0.14, 0.02), '#e6e3da', [0, 0.55, -1.27]);
   S.pivots = null; Object.assign(S, { half: 0.78, len: 1.5 });
   return S;
 }
+
 const SPEC = { scooter: specScooter(), bike: specBike(), car: specCar(), auto: specAuto() };
 
 /* merge a spec into a few meshes: one per material, per moving part */
@@ -261,8 +291,8 @@ function buildTraffic() {
     v.s = (i / kinds.length) * trafficPath.len + rr(-6, 6); v.v = 0; v.cruise = k === 'car' ? rr(7, 8.5) : k === 'auto' ? rr(5.5, 7) : rr(7, 9.5);
     v.kind = k; v.radius = two ? 0.6 : k === 'auto' ? 1.0 : 1.3; v.blockedT = 0; v.pos = new THREE.Vector3(); v.heading = 0;
     if (two) {
-      const av = bakeRig(buildAvatar(randomRiderCfg())); v.rig = new Rig(av); v.rig.ride = 1;
-      av.root.position.set(0, SPEC[k].seat.y + 0.07 - av.hipY, SPEC[k].seat.z); v.root.add(av.root);
+      const h = makeHuman(CROWD[i % CROWD.length]); v.rig = h.rig; v.rig.ride = 1;
+      h.root.position.set(...h.rig.seatOffset(v)); v.root.add(h.root);
     }
     scene.add(v.root); traffic.push(v);
   });
@@ -296,7 +326,7 @@ function updateTraffic(dt, live) {
     v.lean = damp(v.lean, two ? clamp(-yawRate * v.v * 0.05, -0.45, 0.45) : 0, 6, dt);
     v.root.position.set(v.pos.x, groundAt(v.pos.x, v.pos.z), v.pos.z); v.root.rotation.set(0, h, v.lean);
     if (v.wheelF) { v.wheelF.rotation.x += (v.v / SPEC[v.kind].R) * dt; v.wheelR.rotation.x = v.wheelF.rotation.x; v.front.rotation.y = clamp(yawRate * 0.15, -0.4, 0.4); }
-    if (v.rig) v.rig.update(dt, 0, 1, v.kind, clamp(yawRate * 0.3, -1, 1));
+    if (v.rig) v.rig.update(dt, 0, 1, v.kind, clamp(yawRate * 0.3, -1, 1), v);
     v.blockedT = gap < 3 && v.v < 0.5 ? v.blockedT + dt : 0;
     if (v.blockedT > 1.6 && live) { v.blockedT = -2.5; horns++; Sound.horn(v.pos, v.kind === 'car' ? 330 : v.kind === 'auto' ? 470 : 520); }
   }

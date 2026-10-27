@@ -102,7 +102,7 @@ function buildGround() {
   zebra(2.5, 3); zebra(STREET_END + 2.5, 2.6); zebra(-118, 2.6);
   for (let i = 0; i < 46; i++) {
     const x = rr(-5.4, 5.4), z = rr(ROAD_Z1 + 10, ROAD_Z0 - 10);
-    B.small.add(null, x, 0.004, z, rr(0.5, 2.2), 0.008, rr(0.4, 1.8), pick(['#2e2c2a', '#34312e', '#3a3632']), 0, rnd() * 3, 0);
+    B.small.add(null, x, 0.003, z, rr(0.4, 1.4), 0.004, rr(0.3, 1.1), pick(['#6a6660', '#625e58', '#706b64']), 0, rnd() * 3, 0);
   }
   for (let i = 0; i < 9; i++) B.cylMetal.add(null, rr(-4.5, 4.5), 0.012, rr(-210, 20), 0.75, 0.02, 0.75, '#5a5650');
   addCollider(null, -16.5, ROAD_Z0, 16.5, ROAD_Z0 + 1.5);
@@ -196,7 +196,7 @@ function shopShell(base, facade, trim, interior) {
   addCollider(base, -hw + PILLAR, -0.4, hw - PILLAR, 0.1, { y0: 3.2, solid: false });
 }
 function glassFront(base, rot, enterable) {
-  const hw = W / 2, x0 = -hw + PILLAR, x1 = hw - PILLAR, door = 1.15;
+  const hw = W / 2, x0 = -hw + PILLAR, x1 = hw - PILLAR, door = 1.45;
   const panels = enterable ? [[x0, -door], [door, x1]] : [[x0, x1]];
   for (const [a, b] of panels) {
     bx(B.glass, base, a, 0.2, -0.06, b, 3.2, -0.04, '#ffffff');
@@ -207,11 +207,12 @@ function glassFront(base, rot, enterable) {
   bx(B.metal, base, x0, 3.18, -0.09, x1, 3.26, -0.01, '#2f3133');
   if (enterable) {
     for (const s of [-1, 1]) {
-      const leaf = new THREE.Mesh(unitBox, matGlass); leaf.scale.set(1.05, 2.9, 0.03);
+      const leaf = new THREE.Mesh(unitBox, matGlass); leaf.scale.set(1.35, 2.9, 0.03);
       const hinge = new THREE.Vector3(s * door, 0, -0.05).applyMatrix4(base);
-      const g = new THREE.Group(); g.position.copy(hinge).setY(0.2 + 1.45); g.rotation.y = rot + s * 1.35; leaf.position.x = -s * 0.53; g.add(leaf); scene.add(g);
+      const g = new THREE.Group(); g.position.copy(hinge).setY(0.2 + 1.45); g.rotation.y = rot + s * 1.35; leaf.position.x = -s * 0.68; g.add(leaf); scene.add(g);
     }
     addCollider(base, -door, -0.3, door, 0.3, { solid: false, cam: false, vehicle: true });
+    bx(B.small, base, -1.2, 0.2, 0.05, 1.2, 0.215, 0.95, '#3a302a');
   }
 }
 function openFront(base, rot, { awning = null } = {}) {

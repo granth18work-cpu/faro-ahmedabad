@@ -16,6 +16,14 @@ Project 01 of Faro Ahmedabad · Gurukul Road, Memnagar
 - **Traffic:** scooters, motorbikes, auto-rickshaws and cars drive on the left, loop round both roundabouts, stop for people in the way and honk if you block them.
 - **Avatars:** adult proportions, everyday outfits (shirt and jeans, kurti with palazzo) alongside kurta, saree, chaniya choli and sherwani, in muted colours.
 
+**Real people and fixes (27 October 2026):**
+
+- **Real 3D people:** everyone on the street (you, passers-by, the shopkeeper, traffic riders and friends) is now a professionally made human from Microsoft Rocketbox (MIT licence) with real walk, run, idle, wave and seated animations. "Choose your look" offers eight people, including a salwar suit and a kurta pyjama. Riders hold the handlebar grips using two-joint arm reaching that follows the steering. Window mannequins keep the Indian outfits.
+- **Shops are reachable again:** the shop's "View shop" button always wins the prompt (a parked scooter gets its own small Ride button), riding up to a shop offers "Park & visit", doors are wider and marked with a doormat.
+- **Smoother friends:** friends' movement is buffered and played back slightly behind real time, adapting to network jitter, with short prediction when an update is late; riders send 15 updates a second. Fixed a bug that pinned friends to the old, shorter street.
+- **Vehicles:** scooters rebuilt from rounded shells (curved leg shield, egg-shaped body), motorbike tank and tail from real profiles, hatchbacks with wheel arches and a sloped windscreen, autos with a curved canopy. Headlights no longer glare in daylight.
+- **Speed:** ambient occlusion is skipped on integrated graphics, and quality steps down faster when frames drop.
+
 **From earlier versions** (the dusk look, festival lights and lighthouse beam were replaced by the realistic version):
 
 - **Opening screen:** the camera drifts down the street at dusk, through an entrance arch that says "પધારો" (welcome). Leaving the street, the back of the arch says "આવજો".

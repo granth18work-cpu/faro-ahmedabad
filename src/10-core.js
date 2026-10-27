@@ -8,6 +8,8 @@ import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.j
 import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
 import { Sky } from 'three/addons/objects/Sky.js';
 import { RGBELoader } from 'three/addons/loaders/RGBELoader.js';
+import { FBXLoader } from 'three/addons/loaders/FBXLoader.js';
+import * as SkeletonUtils from 'three/addons/utils/SkeletonUtils.js';
 
 /* ---------- small helpers ---------- */
 const $ = (id) => document.getElementById(id);
@@ -137,7 +139,7 @@ const GENERIC = [
 /* ---------- street layout (metres) ---------- */
 const W = 11, D = 10, H1 = 4.4, FH = 3.2, FRONT = 10.5, PITCH = 13.5, PILLAR = 0.9, N_SLOTS = 16;
 const shopZ = (slot) => -10 - slot * PITCH;
-const SPAWN = new THREE.Vector3(0, 0, 15);
+const SPAWN = new THREE.Vector3(-8.2, 0, 15);   /* on the footpath just inside the arch */
 const STREET_END = -222;                         /* footpaths and shops end here */
 const LIGHTHOUSE = new THREE.Vector3(0, 0, -238);
 const ENTRY_RB = new THREE.Vector3(0, 0, 40);    /* roundabout beyond the entrance arch */
@@ -152,7 +154,6 @@ try {
   $('loaderText').textContent = "This device couldn't start 3D. Try a recent Chrome, Safari or Firefox.";
   throw e;
 }
-const HIGH = !isTouch && !/[?&]nogtao\b/.test(location.search);                            /* desktops get ambient occlusion and bloom */
 let pixelRatio = Math.min(devicePixelRatio || 1, isTouch ? 1.5 : 1.75);
 renderer.setPixelRatio(pixelRatio);
 renderer.setSize(innerWidth, innerHeight, false);
@@ -161,6 +162,9 @@ renderer.toneMappingExposure = 1.12;
 renderer.shadowMap.enabled = true;
 renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 const maxAniso = renderer.capabilities.getMaxAnisotropy();
+const GPU = (() => { try { const gl = renderer.getContext(), e = gl.getExtension('WEBGL_debug_renderer_info'); return e ? String(gl.getParameter(e.UNMASKED_RENDERER_WEBGL)) : ''; } catch { return ''; } })();
+/* ambient occlusion only on desktops with a capable GPU; integrated Intel chips skip it */
+const HIGH = !isTouch && !/intel|swiftshader|llvmpipe|mali|adreno/i.test(GPU) && !/[?&]nogtao\b/.test(location.search);
 
 const scene = new THREE.Scene();
 const HAZE = new THREE.Color('#cbb89e');          /* warm afternoon dust haze */

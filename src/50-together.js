@@ -2,7 +2,7 @@
 /* Friends' phones connect to each other directly (WebRTC). Public relays only help them find each other;
    the room code doubles as the password, so the relays never see what is said. */
 const TRYSTERO_URL = 'https://cdn.jsdelivr.net/npm/@trystero-p2p/nostr@0.26.0/+esm';
-const APP_ID = 'faro-ahmedabad-gurukul-v2';
+const APP_ID = 'faro-ahmedabad-gurukul-v3';
 const MAX_FRIENDS = 7;
 const SITE_URL = location.origin + location.pathname;
 const REACTIONS = [
@@ -25,8 +25,7 @@ const displayName = () => name.trim().slice(0, 16) || 'Friend';
 const cleanName = (n) => String(n ?? '').replace(/[\u0000-\u001f\u007f<>]/g, '').trim().slice(0, 16) || 'Friend';
 function cleanCfg(c) {
   c = c && typeof c === 'object' ? c : {};
-  const ok = (v, list) => (list.includes(v) ? v : list[0]);
-  return { outfit: ok(c.outfit, OUTFITS.map((o) => o.id)), primary: ok(c.primary, PRIMARY.map((p) => p[1])), accent: ok(c.accent, ACCENT.map((p) => p[1])), skin: ok(c.skin, SKIN), hair: ok(c.hair, HAIR.map((h) => h[0])) };
+  return { person: PERSON_IDS.includes(c.person) ? c.person : PERSON_IDS[0] };
 }
 const friends = () => [...group.peers.values()].filter((p) => p.av);
 
@@ -101,21 +100,26 @@ function onHello(d, id) {
   const nc = cleanCfg(d.cfg), nm = cleanName(d.name);
   if (!p) {
     if (group.peers.size >= MAX_FRIENDS) return;
-    p = { id, x: 0, z: 0, y: 0, heading: 0, tx: 0, tz: 0, ty: 0, th: 0, ts: 0, seen: false, cfg: null, name: '', av: null, rig: null, tag: null, bubble: null, bubbleT: 0, lastReact: -9, mode: 0, paint: 0, veh: null, lean: 0, tlean: 0, steer: 0, tsteer: 0 };
+    p = { id, x: 0, z: 0, y: 0, heading: 0, tx: 0, tz: 0, ty: 0, th: 0, ts: 0, seen: false, cfg: null, name: '', av: null, rig: null, tag: null, bubble: null, bubbleT: 0, lastReact: -9, mode: 0, paint: 0, veh: null, lean: 0, tlean: 0, steer: 0, tsteer: 0, snaps: [], jit: 0 };
     group.peers.set(id, p);
     toast(`${nm} joined the group`);
   }
-  if (!p.av || JSON.stringify(nc) !== JSON.stringify(p.cfg)) {
-    disposePeerAvatar(p);
-    p.av = bakeRig(buildAvatar(nc)); p.rig = new Rig(p.av); p.av.root.visible = p.seen; scene.add(p.av.root);
-    if (p.seen) p.av.root.position.set(p.x, p.y, p.z);
-    if (p.veh) seatPeer(p);
+  if (!p.av || p.cfg?.person !== nc.person) {
+    /* fetch this person's model first if nobody on the street is using it yet */
+    if (!personReady.get(nc.person)) { loadPerson(nc.person).then(() => { if (group.peers.get(id) === p) onHello(d, id); }).catch(noop); if (!p.av) return; }
+    else {
+      if (p.av) { if (p.tag) { p.tag.material.map.dispose(); p.tag.material.dispose(); p.tag = null; } disposeHuman(p.av); }
+      p.av = makeHuman(nc.person); p.rig = p.av.rig; p.av.root.visible = p.seen; scene.add(p.av.root);
+      if (p.seen) p.av.root.position.set(p.x, p.y, p.z);
+      if (p.veh) seatPeer(p);
+    }
   }
   if (nm !== p.name || !p.tag || p.tag.parent !== p.av.root) {
     if (p.tag) { p.tag.material.map.dispose(); p.tag.material.dispose(); p.tag.removeFromParent(); }
-    p.tag = makeTag(nm, nc.primary); p.av.root.add(p.tag);
+    p.tag = makeTag(nm, '#d9bf8c'); p.av.root.add(p.tag);
   }
-  p.cfg = nc; p.name = nm;
+  if (p.av && personReady.get(nc.person)) p.cfg = nc;
+  p.name = nm;
   setStatus(); renderGroupIfOpen();
 }
 function onPos(d, id) {
@@ -123,9 +127,13 @@ function onPos(d, id) {
   if (!p || !p.av || !Array.isArray(d) || d.length !== 9 || !d.every(Number.isFinite)) return;
   const [x, z, y, h, s, mode, paint, lean, steer] = d;
   setPeerRide(p, clamp(Math.round(mode), 0, 2), clamp(Math.round(paint), 0, PAINTS.length - 1));
-  p.tlean = clamp(lean, -0.6, 0.6); p.tsteer = clamp(steer, -1, 1);
-  p.tx = clamp(x, -25, 25); p.tz = clamp(z, -115, 30); p.ty = clamp(y, 0, 1); p.th = h; p.ts = clamp(s, 0, 8);
-  if (!p.seen || Math.hypot(p.tx - p.x, p.tz - p.z) > 8) { p.x = p.tx; p.z = p.tz; p.y = p.ty; p.heading = p.th; }
+  /* buffer timestamped updates; updateGroup plays them back slightly behind real time */
+  const now = performance.now() / 1000, snap = { t: now, x: clamp(x, -25, 25), z: clamp(z, ROAD_Z1, ROAD_Z0), y: clamp(y, 0, 1), h, s: clamp(s, 0, 20), lean: clamp(lean, -0.6, 0.6), steer: clamp(steer, -1, 1) };
+  const last = p.snaps[p.snaps.length - 1];
+  if (last) { const gap = now - last.t; p.jit = p.jit ? p.jit * 0.85 + Math.min(gap, 0.6) * 0.15 : gap; }
+  p.snaps.push(snap); if (p.snaps.length > 12) p.snaps.shift();
+  p.ts = snap.s;
+  if (!p.seen || Math.hypot(snap.x - p.x, snap.z - p.z) > 12) { p.x = snap.x; p.z = snap.z; p.y = snap.y; p.heading = h; p.snaps = [snap]; }
   if (!p.seen) {
     p.seen = true; p.av.root.visible = true; setStatus(); renderGroupIfOpen();
     if (group.invited && !group.teleported && state === 'play') { group.teleported = true; goToFriend(p); toast(`You're with ${p.name} now`); }
@@ -159,7 +167,7 @@ function removePeer(id, announce) {
 }
 function seatPeer(p) {
   p.veh.root.add(p.av.root);
-  p.av.root.position.set(0, p.veh.spec.seat.y + 0.07 - p.av.hipY, p.veh.spec.seat.z); p.av.root.rotation.set(0, 0, 0);
+  p.av.root.position.set(...p.rig.seatOffset(p.veh)); p.av.root.rotation.set(0, 0, 0);
 }
 function setPeerRide(p, mode, paint) {
   const type = mode === 2 ? 'bike' : 'scooter';
@@ -178,8 +186,9 @@ function disposePeerVehicle(p) {
 function disposePeerAvatar(p) {
   disposePeerVehicle(p);
   if (!p.av) return;
-  p.av.root.traverse((o) => { if (o.isMesh) o.geometry.dispose(); if (o.isSprite) { o.material.map?.dispose(); o.material.dispose(); } });
-  p.av.root.removeFromParent(); p.av = null; p.tag = null; p.bubble = null;
+  if (p.tag) { p.tag.material.map?.dispose(); p.tag.material.dispose(); }
+  if (p.bubble) p.bubble.material.dispose();
+  disposeHuman(p.av); p.av = null; p.tag = null; p.bubble = null;
 }
 
 /* ---------- following and meeting up ---------- */
@@ -225,7 +234,7 @@ function showBubble(p, i) {
   const holder = p || selfBubble, root = p ? p.av?.root : player.av?.root; if (!root) return;
   if (holder.bubble) { holder.bubble.removeFromParent(); holder.bubble.material.dispose(); }
   const s = new THREE.Sprite(new THREE.SpriteMaterial({ map: bubbleTexture(i), transparent: true, depthWrite: false }));
-  s.position.y = 2.7; s.renderOrder = 11; s.scale.set(0.01, 0.01, 1); root.add(s);
+  s.position.y = 2.38; s.renderOrder = 11; s.scale.set(0.01, 0.01, 1); root.add(s);
   holder.bubble = s; holder.bubbleT = 3.2;
 }
 function tickBubble(holder, dt) {
@@ -281,13 +290,13 @@ function openGroup() {
 }
 function renderGroupIfOpen() { if (ui.groupSheet.classList.contains('open')) renderGroup(); }
 function memberRow(p, you) {
-  const c = you ? cfg : p.cfg, nm = you ? `${displayName()} (you)` : p.name;
+  const pid = you ? cfg.person : p.cfg?.person || PERSON_IDS[0], nm = you ? `${displayName()} (you)` : p.name;
   const where = you ? whereIs(player.pos.x, player.pos.z) : p.seen ? whereIs(p.x, p.z) : 'Connecting…';
   const actions = you ? '' : `<div class="member-actions">
       <button class="btn" data-act="goto" data-id="${esc(p.id)}" ${p.seen ? '' : 'disabled'}>Go to</button>
       <button class="btn${group.follow === p.id ? ' on' : ''}" data-act="follow" data-id="${esc(p.id)}" aria-pressed="${group.follow === p.id}" ${p.seen ? '' : 'disabled'}>${group.follow === p.id ? 'Following' : 'Follow'}</button>
     </div>`;
-  return `<li class="member"><span class="member-av" style="--c:${c.primary};--c2:${c.accent}" aria-hidden="true"></span>
+  return `<li class="member"><span class="member-av" style="background:#2a2a2c url(assets/people/${pid}_thumb.jpg) 50% 12%/cover" aria-hidden="true"></span>
     <div style="min-width:0"><p class="member-name">${esc(nm)}</p><p class="member-sub" data-where="${you ? 'me' : esc(p.id)}">${esc(where)}</p></div>${actions}</li>`;
 }
 function renderGroup() {
@@ -353,25 +362,48 @@ ui.groupSheet.addEventListener('click', (e) => {
 });
 $('groupBtn').addEventListener('click', openGroup);
 
+/* ---------- smooth playback of a friend's movement ---------- */
+const _smp = { x: 0, z: 0, y: 0, h: 0, s: 0, lean: 0, steer: 0 };
+function samplePeer(p, now) {
+  const S = p.snaps; if (!S.length) return null;
+  const delay = clamp((p.jit || 0.1) * 1.7, 0.09, 0.32), rt = now - delay;
+  let i = S.length - 1; while (i > 0 && S[i].t > rt) i--;
+  const a = S[i], b = S[i + 1];
+  if (b && rt >= a.t) {
+    const f = clamp((rt - a.t) / Math.max(1e-3, b.t - a.t), 0, 1);
+    _smp.x = a.x + (b.x - a.x) * f; _smp.z = a.z + (b.z - a.z) * f; _smp.y = a.y + (b.y - a.y) * f;
+    _smp.h = a.h + angleDiff(a.h, b.h) * f; _smp.s = a.s + (b.s - a.s) * f; _smp.lean = a.lean + (b.lean - a.lean) * f; _smp.steer = a.steer + (b.steer - a.steer) * f;
+    return _smp;
+  }
+  /* the next update is late: keep them moving the way they were going, briefly */
+  const ahead = clamp(rt - a.t, 0, 0.35), moving = a.s > 0.3 ? 1 : 0;
+  _smp.x = a.x + Math.sin(a.h) * a.s * ahead * moving; _smp.z = a.z + Math.cos(a.h) * a.s * ahead * moving; _smp.y = a.y;
+  _smp.h = a.h; _smp.s = a.s; _smp.lean = a.lean; _smp.steer = a.steer;
+  return _smp;
+}
+
 /* ---------- per frame ---------- */
 function updateGroup(dt) {
   tickBubble(selfBubble, dt);
   if (!group.room) return;
   group.sendT -= dt; group.idleT -= dt;
   if (state === 'play' && group.sendT <= 0) {
-    group.sendT = 0.1;
+    group.sendT = player.ride ? 1 / 15 : 0.1;
     const msg = posMsg(), key = msg.join(',');
     if (key !== group.lastSent || group.idleT <= 0) { send('pos', msg); group.lastSent = key; group.idleT = 1; }
   }
-  const k = 1 - Math.exp(-10 * dt);
+  const k = 1 - Math.exp(-22 * dt), now = performance.now() / 1000;
   for (const p of group.peers.values()) {
     if (!p.av || !p.seen) continue;
-    p.x += (p.tx - p.x) * k; p.z += (p.tz - p.z) * k; p.y += (p.ty - p.y) * k; p.heading += angleDiff(p.heading, p.th) * k;
-    p.lean += (p.tlean - p.lean) * k; p.steer += (p.tsteer - p.steer) * k;
+    const t = samplePeer(p, now);
+    if (t) {
+      p.x += (t.x - p.x) * k; p.z += (t.z - p.z) * k; p.y += (t.y - p.y) * k; p.heading += angleDiff(p.heading, t.h) * k;
+      p.lean += (t.lean - p.lean) * k; p.steer += (t.steer - p.steer) * k; p.ts = t.s;
+    }
     if (p.veh) {
       const v = p.veh; v.root.position.set(p.x, p.y, p.z); v.root.rotation.set(0, p.heading, p.lean);
       if (v.wheelF) { v.wheelF.rotation.x += (p.ts / v.spec.R) * dt; v.wheelR.rotation.x = v.wheelF.rotation.x; v.front.rotation.y = p.steer * 0.35; }
-      p.rig.update(dt, 0, 1, v.type, p.steer);
+      p.rig.update(dt, 0, 1, v.type, p.steer, v);
     } else {
       p.av.root.position.set(p.x, p.y, p.z); p.av.root.rotation.y = p.heading;
       p.rig.update(dt, p.ts);

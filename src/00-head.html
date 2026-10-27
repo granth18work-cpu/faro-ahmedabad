@@ -96,6 +96,11 @@ kbd{font:500 11px/1 var(--f-mono);padding:3px 5px;border-radius:5px;border:1px s
 .swatches{display:flex;flex-wrap:wrap;gap:10px}
 .sw{width:34px;height:34px;border-radius:50%;padding:0;cursor:pointer;border:2px solid rgba(242,239,232,.28);background:var(--c)}
 .sw[aria-pressed="true"]{box-shadow:0 0 0 2px var(--night),0 0 0 4px var(--marigold)}
+.people{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
+.person{display:grid;gap:4px;padding:4px 4px 6px;border-radius:var(--r-ctl);border:1px solid var(--line);background:rgba(242,239,232,.04);cursor:pointer;font-size:11px;line-height:1.2;color:var(--chalk-2);text-align:center}
+.person img{width:100%;aspect-ratio:3/4;object-fit:cover;object-position:50% 10%;border-radius:8px;background:#2a2a2c;display:block}
+.person[aria-pressed="true"]{border-color:var(--saffron);background:rgba(196,162,106,.16);color:var(--chalk)}
+.person:focus-visible{outline:2px solid var(--marigold);outline-offset:2px}
 .field{display:grid;gap:8px;font-size:13px;font-weight:600;color:var(--chalk-2)}
 .field input{width:100%;min-height:44px;padding:0 14px;border-radius:var(--r-ctl);border:1px solid var(--line);background:rgba(242,239,232,.07);color:var(--chalk);font-size:16px;font-weight:500}
 .panel-foot{display:flex;gap:10px;padding:14px 22px calc(16px + env(safe-area-inset-bottom,0px));border-top:1px solid var(--line)}
@@ -111,6 +116,7 @@ kbd{font:500 11px/1 var(--f-mono);padding:3px 5px;border-radius:5px;border:1px s
 .hud-tr{position:absolute;top:calc(14px + env(safe-area-inset-top,0px));right:16px;display:flex;gap:8px;pointer-events:auto}
 .prompt{position:absolute;left:50%;bottom:calc(28px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);display:flex;align-items:center;gap:16px;padding:10px 10px 10px 18px;border-radius:18px;max-width:calc(100vw - 32px);pointer-events:auto;animation:rise .35s cubic-bezier(.2,.8,.2,1)}
 .prompt > div{min-width:0}
+.prompt-actions{display:flex;gap:8px;flex:none}
 .prompt-name{margin:0;font-weight:700;font-size:16px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .prompt-sub{margin:0;font-size:13px;color:var(--chalk-2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 @keyframes rise{from{opacity:0;transform:translate(-50%,10px)}}
@@ -205,6 +211,7 @@ kbd{font:500 11px/1 var(--f-mono);padding:3px 5px;border-radius:5px;border:1px s
   .ride-btn{bottom:calc(236px + env(safe-area-inset-bottom,0px))}
   .ride-hud{left:auto;right:16px;transform:none;flex-direction:column;align-items:stretch;bottom:calc(30px + env(safe-area-inset-bottom,0px))}
   .ride-hud kbd{display:none}
+  .prompt-actions{flex-direction:column}
   .hud-tr .narrow{display:inline}
   .react{bottom:calc(168px + env(safe-area-inset-bottom,0px));flex-direction:column-reverse;align-items:flex-end}
   .react-tray{flex-direction:column;align-items:stretch;border-radius:18px}
@@ -250,17 +257,13 @@ kbd{font:500 11px/1 var(--f-mono);padding:3px 5px;border-radius:5px;border:1px s
 <aside class="creator glass" id="creator" hidden aria-label="Avatar maker">
   <header class="panel-head">
     <p class="eyebrow">Your avatar</p>
-    <h2>Dress for Gurukul</h2>
+    <h2>Choose your look</h2>
   </header>
   <div class="panel-body">
     <label class="field" for="nameInput">Name on your tag
       <input id="nameInput" maxlength="16" placeholder="Your name" autocomplete="off">
     </label>
-    <div class="group"><div class="group-label">Outfit <output id="outfitOut"></output></div><div class="opts" id="optOutfit"></div></div>
-    <div class="group"><div class="group-label">Colour <output id="primaryOut"></output></div><div class="swatches" id="optPrimary"></div></div>
-    <div class="group"><div class="group-label">Border and work <output id="accentOut"></output></div><div class="swatches" id="optAccent"></div></div>
-    <div class="group"><div class="group-label">Skin tone</div><div class="swatches" id="optSkin"></div></div>
-    <div class="group"><div class="group-label">Hair <output id="hairOut"></output></div><div class="opts three" id="optHair"></div></div>
+    <div class="group"><div class="group-label">Who you walk as <output id="personOut"></output></div><div class="people" id="optPerson"></div></div>
   </div>
   <footer class="panel-foot">
     <button class="btn" id="shuffleBtn">Shuffle</button>
@@ -292,7 +295,7 @@ kbd{font:500 11px/1 var(--f-mono);padding:3px 5px;border-radius:5px;border:1px s
   <div class="hint glass" id="hint"></div>
   <div class="prompt glass" id="prompt" hidden>
     <div><p class="prompt-name" id="promptName"></p><p class="prompt-sub" id="promptSub"></p></div>
-    <button class="btn primary sm" id="promptBtn">View shop <kbd class="wide">E</kbd></button>
+    <div class="prompt-actions"><button class="btn sm" id="promptAlt" hidden>Ride <kbd class="wide">R</kbd></button><button class="btn primary sm" id="promptBtn">View shop <kbd class="wide">E</kbd></button></div>
   </div>
   <div class="joy" id="joy" hidden><div class="joy-knob" id="joyKnob"></div></div>
 </div>

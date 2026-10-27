@@ -18,7 +18,7 @@ Walkable 3D versions of Ahmedabad's famous market streets. Visitors make an avat
 | `build.py` | Joins the parts in `src/` into `site/index.html` |
 | `site/` | The website. Everything in this folder is published. |
 | `site/index.html` | The built page (do not edit by hand; edit `src/` and rebuild) |
-| `site/assets/` | Photo textures and sky lighting from Poly Haven (CC0), see `site/assets/CREDITS.md` |
+| `site/assets/` | Photo textures and sky lighting from Poly Haven (CC0), people and animations from Microsoft Rocketbox (MIT); see `site/assets/CREDITS.md` |
 | `site/og-image.jpg` | The preview image shown when the link is shared |
 | `01 Gurukul Street/` | Project notes: what the prototype includes, controls, next steps |
 | `.github/workflows/deploy.yml` | Publishes `site/` to GitHub Pages on every push to `main` |

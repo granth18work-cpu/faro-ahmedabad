@@ -6,12 +6,12 @@ const ui = {
   groupSheet: $('groupSheet'), groupDot: $('groupDot'), react: $('react'), reactTray: $('reactTray'), reactBtn: $('reactBtn'), inviteNote: $('inviteNote'),
   rideHud: $('rideHud'), rideSpeed: $('rideSpeed'), rideBtn: $('rideBtn'), rideSheet: $('rideSheet'),
 };
-const STORE_KEY = 'faro-gurukul-avatar-v2';
+const STORE_KEY = 'faro-gurukul-avatar-v3';
 const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
-const WALK = 3.0, RUN = 6.4;
+const WALK = 2.0, RUN = 4.6;
 
 let state = 'loading', clock = 0, last = 0, camTween = null, traveling = false, mapTick = 0;
-let cfg = { outfit: 'casual', primary: '#3a3a3d', accent: '#a8884e', skin: SKIN[2], hair: 'short' };
+let cfg = { person: 'm014' };
 let name = '';
 const player = { pos: SPAWN.clone(), vel: new THREE.Vector2(), heading: 0, turnTo: null, speed: 0, y: 0, av: null, rig: null, tag: null, ride: null };
 const cam = { yaw: 0, pitch: 0.32, dist: 5.2, yawT: 0, pitchT: 0.32, distT: 5.2, cur: 5.2, target: new THREE.Vector3(), lastDrag: -10 };
@@ -38,7 +38,7 @@ function makeTag(text, ring) {
   if (g.roundRect) g.roundRect((512 - w) / 2, 12, w, 88, 44); else g.rect((512 - w) / 2, 12, w, 88);
   g.fill(); if (ring) { g.strokeStyle = ring; g.lineWidth = 6; g.stroke(); } g.fillStyle = '#f2efe8'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText(text, 256, 60);
   const s = new THREE.Sprite(new THREE.SpriteMaterial({ map: canvasTex(c), transparent: true, depthWrite: false }));
-  s.scale.set(1.0, 0.22, 1); s.position.y = 2.22; s.renderOrder = 10; return s;
+  s.scale.set(0.9, 0.2, 1); s.position.y = 2.02; s.renderOrder = 10; return s;
 }
 function updateTag() {
   if (player.tag) { player.tag.material.map.dispose(); player.tag.material.dispose(); player.tag.removeFromParent(); }
@@ -46,22 +46,20 @@ function updateTag() {
   groupAnnounce();
 }
 function setPlayerAvatar() {
-  if (player.av) disposeAvatar(player.av);
-  player.av = buildAvatar(cfg); player.rig = new Rig(player.av);
+  const id = cfg.person;
+  if (!personReady.get(id)) { loadPerson(id).then(() => { if (cfg.person === id) setPlayerAvatar(); }); if (player.av) return; }
+  if (player.av) disposeHuman(player.av);
+  player.av = makeHuman(id); player.rig = player.av.rig;
   scene.add(player.av.root); updateTag();
 }
-function randomCfg() {
-  const outfit = pick(['casual', 'casual', 'kurti', 'kurti', 'kurta', 'saree', 'casual', 'chaniya', 'kurti', 'sherwani']);
-  const fem = outfit === 'chaniya' || outfit === 'saree' || outfit === 'kurti';
-  return { outfit, primary: pick(PRIMARY)[1], accent: pick(ACCENT)[1], skin: pick(SKIN), hair: fem ? pick(['long', 'bun', 'braid', 'braid']) : pick(['short', 'short', 'curly', outfit === 'sherwani' ? 'safo' : 'short']) };
-}
+function randomCfg() { return { person: pick(PEOPLE).id }; }
 
 /* ---------- people on the street ---------- */
 function spawnNPCs() {
-  const n = isTouch ? 8 : 14;
+  const n = isTouch ? 6 : 11;
   for (let i = 0; i < n; i++) {
-    const av = bakeRig(buildAvatar(randomCfg())), side = i % 2 ? 1 : -1;
-    const npc = { av, rig: new Rig(av), side, x: side * rr(8.6, 9.7), z: rr(-212, -6), dir: rnd() < 0.5 ? -1 : 1, speed: rr(1.1, 1.6), pause: 0, heading: 0 };
+    const av = makeHuman(CROWD[i % CROWD.length]), side = i % 2 ? 1 : -1;
+    const npc = { av, rig: av.rig, side, x: side * rr(8.6, 9.7), z: rr(-212, -6), dir: rnd() < 0.5 ? -1 : 1, speed: rr(1.1, 1.6), pause: 0, heading: 0 };
     npc.heading = npc.dir > 0 ? 0 : Math.PI;
     scene.add(av.root); npcs.push(npc);
   }
@@ -85,8 +83,8 @@ function updateNPCs(dt) {
   }
 }
 function initKeeper() {
-  const av = bakeRig(buildAvatar({ outfit: 'kurta', primary: '#efe6d2', accent: '#6e1b2c', skin: SKIN[3], hair: 'short' }));
-  keeper = { av, rig: new Rig(av) }; scene.add(av.root);
+  const av = makeHuman('m204');
+  keeper = { av, rig: av.rig }; scene.add(av.root);
 }
 function moveKeeper(shop) {
   keeperShop = shop;
@@ -100,7 +98,7 @@ function shopAt(x, z) {
   let best = null, bestD = 1e9, inside = false;
   for (const s of SHOPS) {
     _l.set(x, 0, z).applyMatrix4(s.inv);
-    if (Math.abs(_l.x) < W / 2 - 0.2 && _l.z > -D && _l.z < 4.0) { const d = Math.max(0, _l.z); if (d < bestD) { bestD = d; best = s; inside = _l.z < 0; } }
+    if (Math.abs(_l.x) < W / 2 - 0.2 && _l.z > -D && _l.z < (player.ride ? 7.6 : 4.2)) { const d = Math.max(0, _l.z); if (d < bestD) { bestD = d; best = s; inside = _l.z < 0; } }
   }
   return { shop: best, inside };
 }
@@ -115,28 +113,32 @@ function updateNear(force) {
   if (!force && r.shop === near.shop && r.inside === near.inside) return;
   const entered = r.shop && r.inside && !(near.inside && near.shop === r.shop);
   near.shop = r.shop; near.inside = r.inside;
-  if (r.shop && r.shop !== keeperShop) moveKeeper(r.shop);
+  if (r.shop && r.shop !== keeperShop && !player.ride) moveKeeper(r.shop);
   if (entered) keeper.rig.hello();
   renderPrompt();
 }
 let promptMode = 'shop';
+/* one prompt for whatever is nearby: the shop always wins the main button; a nearby scooter gets its own button */
 function renderPrompt() {
-  const s = near.shop, rv = nearRide;
-  const blocked = state !== 'play' || !!player.ride || [ui.shopSheet, ui.dirSheet, ui.groupSheet, ui.rideSheet].some((el) => el.classList.contains('open'));
+  const s = near.shop, rv = player.ride ? null : nearRide, alt = $('promptAlt');
+  const blocked = state !== 'play' || [ui.shopSheet, ui.dirSheet, ui.groupSheet, ui.rideSheet].some((el) => el.classList.contains('open'));
   if (blocked || (!s && !rv)) { ui.prompt.hidden = true; return; }
   ui.prompt.hidden = false;
-  if (rv && !(s && near.inside)) {
+  if (s) {
+    promptMode = 'shop';
+    ui.promptName.textContent = s.name;
+    ui.promptSub.textContent = player.ride ? 'Park here and step inside' : (near.inside ? 'You are inside · ' : '') + CATS[s.cat].label + ' · ' + rupee(s.price[0]) + ' to ' + rupee(s.price[1]);
+    $('promptBtn').innerHTML = player.ride ? 'Park &amp; visit <kbd class="wide">E</kbd>' : 'View shop <kbd class="wide">E</kbd>';
+    alt.hidden = !rv;
+  } else {
     promptMode = 'ride';
     ui.promptName.textContent = `${rv.type === 'bike' ? 'Motorbike' : 'Scooter'} · ${PAINTS[rv.paintIdx][0]}`;
     ui.promptSub.textContent = 'Faro Rides · free to ride on Gurukul';
     $('promptBtn').innerHTML = 'Ride <kbd class="wide">R</kbd>';
-  } else {
-    promptMode = 'shop';
-    ui.promptName.textContent = s.name;
-    ui.promptSub.textContent = (near.inside ? 'You are inside · ' : '') + CATS[s.cat].label + ' · ' + rupee(s.price[0]) + ' to ' + rupee(s.price[1]);
-    $('promptBtn').innerHTML = 'View shop <kbd class="wide">E</kbd>';
+    alt.hidden = true;
   }
 }
+function visitShop(shop) { if (player.ride) dismount(true); openShop(shop); }
 
 /* ---------- collisions ---------- */
 function collide(p, r, veh = false, dyn = true) {
@@ -200,7 +202,7 @@ addEventListener('keydown', (e) => {
   if (state === 'play' && ['arrowup', 'arrowdown', 'arrowleft', 'arrowright', ' '].includes(k)) e.preventDefault();
   keys.add(k);
   if (state !== 'play' || e.repeat) return;
-  if ((k === 'e' || k === 'enter') && near.shop && !player.ride && document.activeElement?.tagName !== 'BUTTON') openShop(near.shop);
+  if ((k === 'e' || k === 'enter') && near.shop && document.activeElement?.tagName !== 'BUTTON') visitShop(near.shop);
   if (k === 'r') { if (player.ride) dismount(); else if (nearRide) mount(nearRide); else openRideSheet(); }
   if (k === 'h' && player.ride) honk();
   if (k === 'f') openDirectory();
@@ -288,7 +290,7 @@ function mount(v) {
   player.ride = v; v.rider = 'me'; v.speed = 0; v.steer = 0; v.lean = 0;
   player.pos.set(v.pos.x, 0, v.pos.z); player.heading = v.heading; player.vel.set(0, 0); player.turnTo = null;
   v.root.add(player.av.root);
-  player.av.root.position.set(0, v.spec.seat.y + 0.07 - player.av.hipY, v.spec.seat.z); player.av.root.rotation.set(0, 0, 0);
+  player.av.root.position.set(...player.rig.seatOffset(v)); player.av.root.rotation.set(0, 0, 0);
   cam.yawT = v.heading + Math.PI; cam.lastDrag = -10;
   Sound.start(v.type);
   ui.rideHud.hidden = false; ui.rideBtn.hidden = true; nearRide = null; renderPrompt(); dismissHint();
@@ -390,6 +392,7 @@ $('muteBtn').addEventListener('click', (e) => { const m = Sound.toggleMute(); e.
 /* ---------- cameras ---------- */
 const camPos = new THREE.Vector3(), lookPos = new THREE.Vector3(), _a = new THREE.Vector3(), _b = new THREE.Vector3();
 function updateCamera(dt) {
+  if (DBG && DBG.view) { camera.position.set(...DBG.view[0]); currentLook.set(...DBG.view[1]); camera.lookAt(currentLook); return; }
   if (state === 'intro' || state === 'loading') {
     const t = clock * (reduceMotion ? 0.015 : 0.05);
     camera.position.set(Math.sin(t * 1.3) * 2.2, 5.2 + Math.sin(t) * 0.6, 22 - (1 - Math.cos(t)) * 26);
@@ -435,7 +438,7 @@ function openCreator() {
   if (player.ride) dismount(true);
   state = 'creator'; closeSheets();
   ui.intro.hidden = true; ui.scrim.classList.add('off'); ui.hud.hidden = true; ui.creator.hidden = false;
-  if (first) { player.pos.copy(SPAWN); player.heading = 0; player.y = 0; }
+  if (first) { player.pos.copy(SPAWN); player.heading = 0; player.y = groundAt(SPAWN.x, SPAWN.z); }
   player.vel.set(0, 0); player.turnTo = null; spin.a = 0; if (player.tag) player.tag.visible = false;
   syncCreator();
 }
@@ -461,27 +464,19 @@ function showHint() {
 function dismissHint() { ui.hint.classList.add('off'); }
 
 /* ---------- creator panel ---------- */
-const CREATOR_GROUPS = [['optOutfit', 'outfit'], ['optPrimary', 'primary'], ['optAccent', 'accent'], ['optSkin', 'skin'], ['optHair', 'hair']];
 function buildCreatorUI() {
-  $('optOutfit').innerHTML = OUTFITS.map((o) => `<button class="opt" data-v="${o.id}" aria-pressed="false">${o.label}<small>${o.sub}</small></button>`).join('');
-  $('optPrimary').innerHTML = PRIMARY.map(([n, c]) => `<button class="sw" data-v="${c}" style="--c:${c}" title="${n}" aria-label="${n}" aria-pressed="false"></button>`).join('');
-  $('optAccent').innerHTML = ACCENT.map(([n, c]) => `<button class="sw" data-v="${c}" style="--c:${c}" title="${n}" aria-label="${n}" aria-pressed="false"></button>`).join('');
-  $('optSkin').innerHTML = SKIN.map((c, i) => `<button class="sw" data-v="${c}" style="--c:${c}" aria-label="Skin tone ${i + 1}" aria-pressed="false"></button>`).join('');
-  $('optHair').innerHTML = HAIR.map(([v, n]) => `<button class="opt" data-v="${v}" aria-pressed="false">${n}</button>`).join('');
-  for (const [id, key] of CREATOR_GROUPS) $(id).addEventListener('click', (e) => {
-    const b = e.target.closest('button'); if (!b || cfg[key] === b.dataset.v) return;
-    cfg[key] = b.dataset.v; syncCreator(); setPlayerAvatar();
+  $('optPerson').innerHTML = PEOPLE.map((p) => `<button class="person" data-v="${p.id}" aria-pressed="false" aria-label="${p.label}"><img src="assets/people/${p.id}_thumb.jpg" alt="" loading="lazy"><span>${p.label}</span></button>`).join('');
+  $('optPerson').addEventListener('click', (e) => {
+    const b = e.target.closest('button'); if (!b || cfg.person === b.dataset.v) return;
+    cfg.person = b.dataset.v; syncCreator(); setPlayerAvatar();
   });
   $('nameInput').addEventListener('input', (e) => { name = e.target.value; updateTag(); });
   $('shuffleBtn').addEventListener('click', () => { cfg = randomCfg(); syncCreator(); setPlayerAvatar(); player.rig.hello(); });
   $('enterBtn').addEventListener('click', () => enterStreet());
 }
 function syncCreator() {
-  for (const [id, key] of CREATOR_GROUPS) $(id).querySelectorAll('button').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.v === cfg[key])));
-  $('outfitOut').textContent = OUTFITS.find((o) => o.id === cfg.outfit)?.label ?? '';
-  $('primaryOut').textContent = PRIMARY.find((p) => p[1] === cfg.primary)?.[0] ?? '';
-  $('accentOut').textContent = ACCENT.find((p) => p[1] === cfg.accent)?.[0] ?? '';
-  $('hairOut').textContent = HAIR.find((h) => h[0] === cfg.hair)?.[1] ?? '';
+  $('optPerson').querySelectorAll('button').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.v === cfg.person)));
+  $('personOut').textContent = PEOPLE.find((p) => p.id === cfg.person)?.label ?? '';
 }
 
 /* ---------- shop details ---------- */
@@ -578,7 +573,8 @@ $('dirList').addEventListener('click', (e) => {
 $('dirClose').addEventListener('click', closeSheets);
 $('shopsBtn').addEventListener('click', openDirectory);
 $('avatarBtn').addEventListener('click', openCreator);
-$('promptBtn').addEventListener('click', () => { if (promptMode === 'ride' && nearRide) mount(nearRide); else if (near.shop) openShop(near.shop); });
+$('promptBtn').addEventListener('click', () => { if (promptMode === 'ride' && nearRide) mount(nearRide); else if (near.shop) visitShop(near.shop); });
+$('promptAlt').addEventListener('click', () => { if (nearRide) mount(nearRide); });
 $('startBtn').addEventListener('click', openCreator);
 
 /* ---------- mini map ---------- */
@@ -635,9 +631,9 @@ addEventListener('resize', applySize);
 function perf(dt) {
   if ((warm += dt) < 4 || document.hidden || DBG) return;
   perfAcc += dt; perfN++;
-  if (perfAcc < 2.5) return;
+  if (perfAcc < 1.5) return;
   const avg = perfAcc / perfN; perfAcc = 0; perfN = 0;
-  if (avg < 1 / 42) return;
+  if (avg < 1 / 45) return;
   if (gtao && gtao.enabled) gtao.enabled = false;
   else if (pixelRatio > 1.25) { pixelRatio = Math.max(1, pixelRatio - 0.25); applySize(); }
   else if (useComposer) useComposer = false;
@@ -650,22 +646,27 @@ function perf(dt) {
 const DBG = /[?&]debug\b/.test(location.search) ? { ms: 0, n: 0, calls: 0, tris: 0, read() { const r = { avgRenderMs: +(this.ms / Math.max(1, this.n)).toFixed(2), frames: this.n, calls: this.calls, tris: this.tris, gtao: !!gtao?.enabled, pixelRatio, composer: useComposer }; this.ms = 0; this.n = 0; return r; } } : null;
 if (DBG) {
   window.faroDebug = DBG;
+  DBG.peers = () => [...group.peers.values()].map((q) => ({ name: q.name, person: q.cfg?.person, hasAvatar: !!q.av, seen: q.seen, x: +q.x.toFixed(1), z: +q.z.toFixed(1), riding: q.veh?.type || null, buffered: q.snaps.length, jitterMs: Math.round((q.jit || 0) * 1000) }));
+  DBG.group = () => ({ code: group.code, room: !!group.room });
+  DBG.look = (pos, at) => { DBG.view = pos ? [pos, at] : null; return 'ok'; };
+  DBG.goShop = (id, inside = false) => { const sh = SHOPS.find((x) => x.id === id); travelTo(sh, inside); return 'travelling'; };
   /* step the simulation at a true 60 fps, holding the given keys, without rendering */
   DBG.sim = (sec, hold = []) => {
     hold.forEach((k) => keys.add(k));
     let maxKmh = 0;
     for (let i = 0; i < Math.round(sec * 60); i++) { clock += 1 / 60; updatePlayer(1 / 60); updateTraffic(1 / 60, false); maxKmh = Math.max(maxKmh, Math.abs(player.ride?.speed || player.speed) * 3.6); }
     hold.forEach((k) => keys.delete(k));
-    return { kmh: Math.round(Math.abs(player.ride?.speed || 0) * 3.6), maxKmh: Math.round(maxKmh), x: +player.pos.x.toFixed(2), z: +player.pos.z.toFixed(2), heading: +player.heading.toFixed(2), lean: +(player.ride?.lean || 0).toFixed(2), riding: player.ride?.type || null };
+    updateNear(true);
+    return { shop: near.shop?.id || null, inside: near.inside, prompt: ui.prompt.hidden ? null : ui.promptName.textContent, kmh: Math.round(Math.abs(player.ride?.speed || 0) * 3.6), maxKmh: Math.round(maxKmh), x: +player.pos.x.toFixed(2), z: +player.pos.z.toFixed(2), heading: +player.heading.toFixed(2), lean: +(player.ride?.lean || 0).toFixed(2), riding: player.ride?.type || null };
   };
 }
 function frame(now) {
   requestAnimationFrame(frame);
   const dt = Math.min(0.05, Math.max(0, (now - last) / 1000)); last = now; clock += dt;
-  if (state === 'play') { updatePlayer(dt); if (!player.ride) updateNear(); updateNearRide(); }
+  if (state === 'play') { updatePlayer(dt); updateNear(); updateNearRide(); }
   if (player.av) {
     if (!player.ride) { const r = player.av.root; r.position.set(player.pos.x, player.y, player.pos.z); r.rotation.y = player.heading + (state === 'creator' ? spin.a : 0); }
-    player.rig.update(dt, state === 'play' ? player.speed : 0, player.ride ? 1 : 0, player.ride?.type, player.ride?.steer || 0);
+    player.rig.update(dt, state === 'play' ? player.speed : 0, player.ride ? 1 : 0, player.ride?.type, player.ride?.steer || 0, player.ride);
   }
   updateTraffic(dt, state === 'play');
   if (state === 'creator' && !pointers.size && !reduceMotion) spin.a += 0.28 * dt;

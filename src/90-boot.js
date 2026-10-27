@@ -7,14 +7,17 @@ async function boot() {
     ]);
   } catch { /* fonts are optional */ }
   performance.mark('faro-fonts');
-  buildWorld();
-  performance.mark('faro-world');
-  buildVehicles();
-  performance.mark('faro-vehicles');
-  spawnNPCs(); initKeeper(); moveKeeper(SHOPS[0]);
   const saved = loadSaved();
   if (saved && saved.cfg) { cfg = cleanCfg({ ...cfg, ...saved.cfg }); name = saved.name || ''; }
   $('nameInput').value = name;
+  /* people download while the street is being built */
+  const peopleReady = Promise.all([...new Set([...CROWD, 'm204', cfg.person])].map(loadPerson));
+  buildWorld();
+  performance.mark('faro-world');
+  try { await peopleReady; } catch (e) { $('loaderText').textContent = "Couldn't load the people on the street. Check your connection and reload."; throw e; }
+  buildVehicles();
+  performance.mark('faro-vehicles');
+  spawnNPCs(); initKeeper(); moveKeeper(SHOPS[0]);
   ui.joy.hidden = !isTouch;
   loadShortlist(); checkInvite();
   setPlayerAvatar(); buildCreatorUI(); applySize();
